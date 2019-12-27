@@ -1,5 +1,6 @@
-<script>
-	export let name;
+<script lang="typescript">
+	export let name: string;
+	let test: string = 'wow';
 </script>
 
 <style lang="scss">
@@ -27,5 +28,6 @@ $xl: 1200px;
 	</div>
 	<div class="contents">
 		{name}
+		{test}
 	</div>
 </div>

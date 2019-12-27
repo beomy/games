@@ -1,7 +1,10 @@
 <script lang="typescript">
+	import Router from 'svelte-spa-router'
+	import { routes } from './routes'
 	import Header from './components/Header.svelte'
 
 	export let name: string;
+
 	let test: string = 'wow';
 </script>
 
@@ -25,9 +28,9 @@
 </style>
 
 <div class="warp">
-	<Header/>
+	<Header />
 	<div class="contents">
 		{name}
-		{test}
+		<Router {routes}/>
 	</div>
 </div>

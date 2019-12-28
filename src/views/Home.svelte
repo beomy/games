@@ -1,7 +1,37 @@
 <script lang="ts">
-	let test: string = 'wowwwww';
+  import GameCard from '@/components/GameCard.svelte'
+
+  let games: Array<Object> = [{
+    link: '/',
+    image: '/images/logo.png',
+    text: 'TEST'
+  }, {
+    link: '/',
+    image: '/images/logo.png',
+    text: 'TEST'
+  }, {
+    link: '/',
+    image: '/images/logo.png',
+    text: 'TEST'
+  }, {
+    link: '/',
+    image: '/images/logo.png',
+    text: 'TEST'
+  }, {
+    link: '/',
+    image: '/images/logo.png',
+    text: 'TEST'
+  }, {
+    link: '/',
+    image: '/images/logo.png',
+    text: 'TEST'
+  }, {
+    link: '/',
+    image: '/images/logo.png',
+    text: 'TEST'
+  }];
 </script>
 
-<div>
-  {test}
-</div>
+{#each games as game, i (i)}
+  <GameCard {game} />
+{/each}

@@ -7,16 +7,22 @@
 
 	@media (min-width: $xl) {
     .game-link {
-      display: inline-block;
       width: 20%;
-      margin-bottom: 20px;
     }
+  }
+  .game-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    text-decoration: none;
   }
   .game-info {
     margin-right: 20px;
   }
   img {
     width: 100%;
+  }
+  .text-area {
+    text-align: center;
   }
 </style>
 

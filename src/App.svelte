@@ -10,6 +10,10 @@
 	@import "./assets/sass/variables.scss";
 
 	@media (min-width: $xl) {
+		.header {
+			width: $xl;
+			margin: auto;
+		}
 		.contents {
 			width: $xl;
 			margin: auto;
@@ -18,7 +22,9 @@
 </style>
 
 <div class="warp">
-	<Header />
+	<div class="header">
+		<Header />
+	</div>
 	<div class="contents">
 		<Router {routes}/>
 	</div>

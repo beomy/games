@@ -1,4 +1,4 @@
-import Home from '../views/Home.svelte'
+import Home from '@/views/Home.svelte'
  
 export const routes = {
   '/': Home,

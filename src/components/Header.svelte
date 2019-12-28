@@ -1,16 +1,22 @@
-<script>
-</script>
-
 <style lang="scss">
+	@import "../assets/sass/variables.scss";
+
+	@media (min-width: $xl) {
+		.header {
+			width: $xl;
+			margin: auto;
+		}
+	}
+
   .logo-link {
     display: inline-block;
     padding: 19px 0;
   }
   .logo-img-box {
     width: 58px;
-    img {
-      width: 100%;
-    }
+  }
+  img {
+    width: 100%;
   }
 </style>
 

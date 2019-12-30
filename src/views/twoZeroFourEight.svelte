@@ -1,18 +1,58 @@
 <script lang="ts">
+  interface Point {
+    x: Number,
+    y: Number,
+  }
+  interface ITile {
+    number: Number;
+    point: Point;
+    score: Number;
+  }
+  class Tile implements ITile {
+    number: Number;
+    point: Point;
+    score: Number;
+
+    constructor (number: number, point: Point) {
+      this.number = number;
+      this.point = point;
+      this.score = 0;
+    }
+
+    getPos (): Point {
+      return this.point;
+    }
+    setPos (point: Point): void {
+      this.point = point;
+    }
+
+    getNumber (): Number {
+      return this.number;
+    }
+    setNumber (number: Number): void {
+      this.number = number;
+    }
+
+    getScore (): Number {
+      return this.score;
+    }
+  }
+
   const gridCount: Array<Number> = [ 1, 2, 3, 4 ];
+  let tile: Array<Tile> = [];
 </script>
 
 <style lang="scss">
   .game-container {
     position: relative;
     padding: 15px;
-    cursor: default;
     touch-action: none;
     background: #bbada0;
     border-radius: 6px;
     width: 500px;
     height: 500px;
     box-sizing: border-box;
+    margin: auto;
   }
   .grid-container {
     position: absolute;
@@ -20,11 +60,7 @@
   }
   .grid-row {
     margin-bottom: 15px;
-    &:after {
-      content: "";
-      display: block;
-      clear: both;
-    }
+    overflow: hidden;
   }
   .grid-cell {
     width: 106.25px;
@@ -45,5 +81,8 @@
         {/each}
       </div>
     {/each}
+  </div>
+  <div class="tile-container">
+
   </div>
 </div>

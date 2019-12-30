@@ -1,5 +1,6 @@
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
+const config = require('./svelte.config')
 
 const mode = process.env.NODE_ENV || 'development';
 const prod = mode === 'production';
@@ -27,11 +28,7 @@ module.exports = {
 				test: /\.svelte$/,
 				use: {
 					loader: 'svelte-loader',
-					options: {
-						emitCss: true,
-						hotReload: true,
-						preprocess: require('svelte-preprocess')({ /* options */ })
-					}
+					options: config
 				}
 			},
 			{

@@ -1,5 +1,5 @@
 <script lang="ts">
-  export let game: Object
+  export let game: Object;
 </script>
 
 <style lang="scss">

@@ -67,6 +67,10 @@
     return new Tile(2, popRemainPoint())
   }
 
+  function handleKeydown ({ keyCode }) {
+    console.log(keyCode)
+  }
+
   let tiles: Array<Tile> = [
     getTile(),
     getTile()
@@ -74,7 +78,7 @@
 </script>
 
 <style lang="scss">
-  @import"../assets/sass/variables.scss";
+  @import "../assets/sass/variables.scss";
   @import "../assets/sass/variables_2048.scss";
 
   .game-container {
@@ -110,22 +114,24 @@
     z-index: 2;
   }
 
-  @media (width: $sm) {
+  @media (max-width: $sm) {
     .game-container {
-      padding: $space;
-      width: $box;
-      height: $box;
+      padding: $smSpace;
+      width: $smBox;
+      height: $smBox;
     }
     .grid-row {
-      margin-bottom: $space;
+      margin-bottom: $smSpace;
     }
     .grid-cell {
-      width: $cell;
-      height: $cell;
-      margin-right: $space;
+      width: $smCell;
+      height: $smCell;
+      margin-right: $smSpace;
     }
   }
 </style>
+
+<svelte:window on:keydown={handleKeydown}/>
 
 <div class="game-container">
   <div class="grid-container">

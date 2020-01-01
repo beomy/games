@@ -5,30 +5,6 @@
     link: '/',
     image: '/images/logo.png',
     text: 'TEST'
-  }, {
-    link: '/',
-    image: '/images/logo.png',
-    text: 'TEST'
-  }, {
-    link: '/',
-    image: '/images/logo.png',
-    text: 'TEST'
-  }, {
-    link: '/',
-    image: '/images/logo.png',
-    text: 'TEST'
-  }, {
-    link: '/',
-    image: '/images/logo.png',
-    text: 'TEST'
-  }, {
-    link: '/',
-    image: '/images/logo.png',
-    text: 'TEST'
-  }, {
-    link: '/',
-    image: '/images/logo.png',
-    text: 'TEST'
   }];
 </script>
 

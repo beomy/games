@@ -8,30 +8,6 @@
   }
 
   let games: Array<GameSummary> = [{
-    link: '#/2048Game',
-    image: '/images/2048_logo.png',
-    text: '2048'
-  }, {
-    link: '/',
-    image: '/images/logo.png',
-    text: 'TEST'
-  }, {
-    link: '/',
-    image: '/images/logo.png',
-    text: 'TEST'
-  }, {
-    link: '/',
-    image: '/images/logo.png',
-    text: 'TEST'
-  }, {
-    link: '/',
-    image: '/images/logo.png',
-    text: 'TEST'
-  }, {
-    link: '/',
-    image: '/images/logo.png',
-    text: 'TEST'
-  }, {
     link: '/',
     image: '/images/logo.png',
     text: 'TEST'

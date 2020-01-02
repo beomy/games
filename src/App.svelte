@@ -2,8 +2,6 @@
 	import Router from 'svelte-spa-router'
 	import { routes } from '@/routes'
 	import Header from '@/components/Header.svelte'
-
-	let test: string = 'wow';
 </script>
 
 <style lang="scss">

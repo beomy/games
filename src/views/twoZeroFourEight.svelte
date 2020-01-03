@@ -4,9 +4,10 @@
   import TitleCell from '@/components/twoZeroFourEight/Tile.svelte'
 
   const rowCount = 4;
-  let remainPoint: Array<String> = [];
+  let remainPoint: Array<string> = [];
   const gridCount: Array<Number> = [];
-  
+  let tiles: Array<Tile> = [];
+
   (function init (): void {
     for (let i = 1; i <= rowCount; i++) {
       for (let j = 1; j <= rowCount; j++) {
@@ -26,7 +27,7 @@
     }
   }
 
-  function getTile (prefix: any): Tile {
+  function getTile (prefix: any = null): Tile {
     const remainPoint = popRemainPoint();
     if (remainPoint) {
       // TODO: 2점, 4점 확률 적용해야 함
@@ -55,7 +56,7 @@
     }
   }
 
-  function moveTile (direction: String): void {
+  function moveTile (direction: string): void {
     const tileGroup = directionTileGroup(direction);
     for (const [key, tiles] of Object.entries(tileGroup)) {
       moveStack(tiles, direction);
@@ -69,13 +70,12 @@
     if (isGameOver()) {
       // TODO: GameOver 화면 구현
     }
-    console.log(remainPoint)
   }
 
   // TODO: 미완성, 버그 수정 필요
-  function moveStack (tileGroup: Array<Tile>, direction: String): void {
+  function moveStack (tileGroup: Array<Tile>, direction: string): void {
     const isAsc: Boolean = ['top', 'left'].includes(direction);
-    const pointField: String = ['top', 'bottom'].includes(direction) ? 'y' : 'x';
+    const pointField: string = ['top', 'bottom'].includes(direction) ? 'y' : 'x';
 
     if (isAsc) {
 
@@ -107,9 +107,8 @@
     return false
   }
 
-  // TODO: $ 문법 사용할 수 있는 방법 고민
   function calcRemainPoint (): void {
-    const ref: Array<String> = []
+    const ref: Array<string> = []
     for (let i = 1; i <= rowCount; i++) {
       for (let j = 1; j <= rowCount; j++) {
         ref.push(`${i},${j}`);
@@ -121,7 +120,7 @@
     remainPoint = ref
   }
 
-  function directionTileGroup (direction: String): Object {
+  function directionTileGroup (direction: string): Object {
     let tileGroup = [];
 
     if (['top', 'bottom'].includes(direction)) {
@@ -145,22 +144,12 @@
     }
 
     return tileGroup;
-  },
+  }
 
-  let tiles: Array<Tile> = [
-    getTile('F'),
-    getTile('S'),
-    getTile('Q'),
-    getTile('W'),
-    getTile('E'),
-    getTile('R'),
-    getTile('T'),
-    getTile('Y'),
-    getTile('U'),
-    getTile('I'),
-    getTile('O'),
-    getTile('P'),
-  ];
+  for (const prefix of ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']) {
+    const newTile = getTile(prefix)
+    tiles = [...tiles, newTile]
+  }
 </script>
 
 <style lang="scss">

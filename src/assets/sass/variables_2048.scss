@@ -1,0 +1,13 @@
+$ratio: 0.56;
+
+$box: 500px;
+$space: 15px;
+$cell: ($box - ($space * 5)) / 4;
+$move: 121px;
+$font: 55px;
+
+$smBox: $box * $ratio;
+$smSpace: 10px;
+$smCell: ($smBox - ($smSpace * 5)) / 4;
+$smMove: $move * $ratio;
+$smFont: $font * $ratio;

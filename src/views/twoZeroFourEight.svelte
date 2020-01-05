@@ -1,4 +1,5 @@
 <script lang="ts">
+  import _ from 'lodash'
   import { Tile, Point } from '@/@types'
   import { number, array } from '@/utils'
   import TitleCell from '@/components/twoZeroFourEight/Tile.svelte'
@@ -7,6 +8,7 @@
   const gridCount: Array<Number> = [];
   let remainPoint: Array<string> = [];
   let tiles: Array<Tile> = [];
+  const historyMove: Array<Array<Tile>> = [];
 
   (function init (): void {
     for (let i = 1; i <= rowCount; i++) {
@@ -39,8 +41,10 @@
     }
   }
 
-  function pushTile (newTile) {
-    tiles = [ ...tiles, newTile, ];
+  function refactoryTile (newTile) {
+    if (newTile) {
+      tiles = [ ...tiles, newTile, ];
+    }
     setTimeout(() => {
       tiles = tiles.filter(x => !x.isDelete);
     }, 100)
@@ -59,29 +63,26 @@
   }
 
   function moveTile (direction: string): void {
+    historyMove.push(_.cloneDeep(tiles))
     const tileGroup = directionTileGroup(direction);
-    for (const [key, tiles] of Object.entries(tileGroup)) {
-      moveTileRow(tiles, direction);
+    for (const [key, tileRow] of Object.entries(tileGroup)) {
+      moveTileRow(tileRow, direction);
     }
 
     // TODO: 이전 타일 모양과 다를 경우만 가져오도록 해야 함
-    const newTile = getTile();
-    if (newTile) {
-      pushTile(newTile)
-    }
+    const newTile = _.isEqual(historyMove[historyMove.length - 1], tiles)
+      ? null
+      : getTile();
+    refactoryTile(newTile)
     if (isGameOver()) {
-      // TODO: GameOver 화면 구현
+      alert('GameOver')
     }
   }
 
-  // TODO: 미완성, 버그 수정 필요
   function moveTileRow (tileRow: Array<Tile>, direction: string): void {
-    const isAsc: Boolean = ['top', 'left'].includes(direction);
-    const pointField: string = ['top', 'bottom'].includes(direction) ? 'y' : 'x';
-
-    while (possibleMove(tileRow, isAsc, pointField)) {
+    while (possibleMove(tileRow, direction)) {
       calcTileNumber(tileRow)
-      calcTilePoint(tileRow, isAsc, pointField)
+      calcTilePoint(tileRow, direction)
       calcRemainPoint()
     }
   }
@@ -97,27 +98,20 @@
     }
   }
 
-  function calcTilePoint (tileRow: Array<Tile>, isAsc: Boolean, pointField: string): void {
+  function calcTilePoint (tileRow: Array<Tile>, direction: string): void {
+    const isAsc: boolean = ['top', 'left'].includes(direction);
+    const pointField: string = ['top', 'bottom'].includes(direction) ? 'y' : 'x';
+    const startPoint = isAsc ? 1 : rowCount
+    const moveDirection = isAsc ? 1 : -1
     for (const cur of tileRow) {
       const index = tileRow.indexOf(cur)
       const pre = getPrevTile(tileRow, index)
-
-      if (isAsc) {
-        if (index === 0) {
-          cur.point[pointField] = 1
-        } else {
-          cur.point[pointField] = cur.isDelete
-            ? pre.point[pointField]
-            : pre.point[pointField] + 1
-        }
+      if (index === 0) {
+        cur.point[pointField] = startPoint
       } else {
-        if (index === 0) {
-          cur.point[pointField] = rowCount
-        } else {
-          cur.point[pointField] = cur.isDelete
-            ? pre.point[pointField]
-            : pre.point[pointField] - 1
-        }
+        cur.point[pointField] = cur.isDelete
+          ? pre.point[pointField]
+          : pre.point[pointField] + moveDirection
       }
     }
   }
@@ -126,45 +120,45 @@
     return tileRow.filter((x, i) => i < index && !x.isDelete).pop()
   }
 
-  function possibleMove (tileRow: Array<Tile>, isAsc: Boolean, pointField: string): Boolean {
+  function possibleMove (tileRow: Array<Tile>, direction: string): boolean {
+    const isAsc: boolean = ['top', 'left'].includes(direction);
+    const pointField: string = ['top', 'bottom'].includes(direction) ? 'y' : 'x';
+
+    const startPoint = isAsc ? 1 : rowCount
+    const moveDirection = isAsc ? 1 : -1
+
     let result = false
     for (const cur of tileRow.filter(x => !x.isDelete)) {
       const index = tileRow.indexOf(cur)
       const pre = getPrevTile(tileRow, index)
 
-      if (isAsc) {
-        if (index === 0) {
-          if (cur.point[pointField] !== 1) {
-            result = true
-          }
-        } else {
-          if (cur.number === pre.number) {
-            result = true
-          } else if (cur.point[pointField] !== pre.point[pointField] + 1) {
-            result = true
-          }
+      if (index === 0 || !pre) {
+        if (cur.point[pointField] !== startPoint) {
+          result = true
         }
       } else {
-        if (index === 0) {
-          if (cur.point[pointField] !== rowCount) {
-            result = true
-          }
-        } else {
-          if (cur.number === pre.number) {
-            result = true
-          } else if (cur.point[pointField] !== pre.point[pointField] - 1) {
-            result = true
-          }
+        if (cur.number === pre.number) {
+          result = true
+        } else if (cur.point[pointField] !== pre.point[pointField] + moveDirection) {
+          result = true
         }
       }
     }
-    console.log(result)
     return result
   }
 
   // TODO: GameOver 조건 구현
-  function isGameOver (): Boolean {
-    return false
+  function isGameOver (): boolean {
+    let isPossibleMove = false
+    const groupRight = directionTileGroup('right')
+    for (const [key, tiles] of Object.entries(groupRight)) {
+      isPossibleMove = isPossibleMove || possibleMove(tiles, 'right');
+    }
+    const groupBottom = directionTileGroup('bottom')
+    for (const [key, tiles] of Object.entries(groupBottom)) {
+      isPossibleMove = isPossibleMove || possibleMove(tiles, 'bottom');
+    }
+    return !isPossibleMove && remainPoint.length === 0
   }
 
   function calcRemainPoint (): void {
@@ -181,13 +175,9 @@
   }
 
   function directionTileGroup (direction: string): Object {
-    let tileGroup = [];
-
-    if (['top', 'bottom'].includes(direction)) {
-      tileGroup = array.groupBy(tiles, 'point.x');
-    } else {
-      tileGroup = array.groupBy(tiles, 'point.y');
-    }
+    const tileGroup = ['top', 'bottom'].includes(direction)
+      ? array.groupBy(tiles, 'point.x')
+      : array.groupBy(tiles, 'point.y')
 
     for (const [key, tiles] of Object.entries(tileGroup)) {
       tiles.sort((a, b) => {

@@ -4,8 +4,8 @@
   import TitleCell from '@/components/twoZeroFourEight/Tile.svelte'
 
   const rowCount = 4;
-  let remainPoint: Array<string> = [];
   const gridCount: Array<Number> = [];
+  let remainPoint: Array<string> = [];
   let tiles: Array<Tile> = [];
 
   (function init (): void {
@@ -17,8 +17,10 @@
     }
   })()
 
-  function popRemainPoint (): Point {
-    const index = number.random(0, remainPoint.length - 1);
+  function popRemainPoint (point: string = null): Point {
+    let index = remainPoint.indexOf(point) >= 0
+      ? remainPoint.indexOf(point)
+      : number.random(0, remainPoint.length - 1);
     const item = remainPoint.splice(index, 1).pop();
     if (item) {
       return new Point(Number(item.split(',')[0]), Number(item.split(',')[1]));
@@ -40,7 +42,7 @@
   function pushTile (newTile) {
     tiles = [ ...tiles, newTile, ];
     setTimeout(() => {
-      tiles = tiles.filter(x => !x.isDup);
+      tiles = tiles.filter(x => !x.isDelete);
     }, 100)
   }
 
@@ -59,7 +61,7 @@
   function moveTile (direction: string): void {
     const tileGroup = directionTileGroup(direction);
     for (const [key, tiles] of Object.entries(tileGroup)) {
-      moveStack(tiles, direction);
+      moveTileRow(tiles, direction);
     }
 
     // TODO: 이전 타일 모양과 다를 경우만 가져오도록 해야 함
@@ -73,33 +75,91 @@
   }
 
   // TODO: 미완성, 버그 수정 필요
-  function moveStack (tileGroup: Array<Tile>, direction: string): void {
+  function moveTileRow (tileRow: Array<Tile>, direction: string): void {
     const isAsc: Boolean = ['top', 'left'].includes(direction);
     const pointField: string = ['top', 'bottom'].includes(direction) ? 'y' : 'x';
 
-    if (isAsc) {
+    while (possibleMove(tileRow, isAsc, pointField)) {
+      calcTileNumber(tileRow)
+      calcTilePoint(tileRow, isAsc, pointField)
+      calcRemainPoint()
+    }
+  }
 
-    } else {
-      for (const tile of tileGroup) {
-        const index = tileGroup.indexOf(tile)
+  function calcTileNumber (tileRow: Array<Tile>): void {
+    for (let index = 1; index < tileRow.length; index++) {
+      const cur = tileRow[index]
+      const pre = getPrevTile(tileRow, index)
+      if (cur.number === pre.number) {
+        pre.number += cur.number
+        cur.isDelete = true
+      }
+    }
+  }
+
+  function calcTilePoint (tileRow: Array<Tile>, isAsc: Boolean, pointField: string): void {
+    for (const cur of tileRow) {
+      const index = tileRow.indexOf(cur)
+      const pre = getPrevTile(tileRow, index)
+
+      if (isAsc) {
         if (index === 0) {
-          tile.point[pointField] = rowCount
+          cur.point[pointField] = 1
         } else {
-          const preTile = tileGroup[index - 1]
-          let point = preTile.point[pointField] - 1 > 0
-              ? preTile.point[pointField] - 1
-              : 1
-          if (tile.number === preTile.number) {
-            point = preTile.point[pointField]
-            preTile.number += tile.number;
-            tile.isDup = true;
-          }
-          tile.point[pointField] = point
+          cur.point[pointField] = cur.isDelete
+            ? pre.point[pointField]
+            : pre.point[pointField] + 1
+        }
+      } else {
+        if (index === 0) {
+          cur.point[pointField] = rowCount
+        } else {
+          cur.point[pointField] = cur.isDelete
+            ? pre.point[pointField]
+            : pre.point[pointField] - 1
         }
       }
     }
+  }
 
-    calcRemainPoint()
+  function getPrevTile(tileRow: Array<Tile>, index: Number) {
+    return tileRow.filter((x, i) => i < index && !x.isDelete).pop()
+  }
+
+  function possibleMove (tileRow: Array<Tile>, isAsc: Boolean, pointField: string): Boolean {
+    let result = false
+    for (const cur of tileRow.filter(x => !x.isDelete)) {
+      const index = tileRow.indexOf(cur)
+      const pre = getPrevTile(tileRow, index)
+
+      if (isAsc) {
+        if (index === 0) {
+          if (cur.point[pointField] !== 1) {
+            result = true
+          }
+        } else {
+          if (cur.number === pre.number) {
+            result = true
+          } else if (cur.point[pointField] !== pre.point[pointField] + 1) {
+            result = true
+          }
+        }
+      } else {
+        if (index === 0) {
+          if (cur.point[pointField] !== rowCount) {
+            result = true
+          }
+        } else {
+          if (cur.number === pre.number) {
+            result = true
+          } else if (cur.point[pointField] !== pre.point[pointField] - 1) {
+            result = true
+          }
+        }
+      }
+    }
+    console.log(result)
+    return result
   }
 
   // TODO: GameOver 조건 구현
@@ -114,7 +174,7 @@
         ref.push(`${i},${j}`);
       }
     }
-    for (const tile of tiles.filter(x => !x.isDup)) {
+    for (const tile of tiles.filter(x => !x.isDelete)) {
       ref.splice(ref.indexOf(`${tile.point.x},${tile.point.y}`), 1)
     }
     remainPoint = ref
@@ -146,7 +206,7 @@
     return tileGroup;
   }
 
-  for (const prefix of ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']) {
+  for (const prefix of ['A', 'B', /*'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'*/]) {
     const newTile = getTile(prefix)
     tiles = [...tiles, newTile]
   }

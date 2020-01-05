@@ -4,7 +4,7 @@ export default class Tile {
     this.number = number;
     this.point = point;
     this.score = 0;
-    this.isDup = false;
+    this.isDelete = false;
   }
 
   getPos () {

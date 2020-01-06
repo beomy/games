@@ -9,6 +9,7 @@
   let remainPoint: Array<string> = [];
   let tiles: Array<Tile> = [];
   const historyMove: Array<Array<Tile>> = [];
+  let score = 0;
 
   (function init (): void {
     for (let i = 1; i <= rowCount; i++) {
@@ -16,6 +17,11 @@
         remainPoint.push(`${i},${j}`);
       }
       gridCount.push(i);
+    }
+
+    for (const prefix of ['A', 'B']) {
+      const newTile = getTile(prefix)
+      tiles = [...tiles, newTile]
     }
   })()
 
@@ -63,28 +69,27 @@
   }
 
   function moveTile (direction: string): void {
-    historyMove.push(_.cloneDeep(tiles))
+    const cloneTiles = _.cloneDeep(tiles)
     const tileGroup = directionTileGroup(direction);
     for (const [key, tileRow] of Object.entries(tileGroup)) {
       moveTileRow(tileRow, direction);
     }
 
-    // TODO: 이전 타일 모양과 다를 경우만 가져오도록 해야 함
-    const newTile = _.isEqual(historyMove[historyMove.length - 1], tiles)
-      ? null
-      : getTile();
-    refactoryTile(newTile)
+    if (_.isEqual(cloneTiles, tiles)) {
+      refactoryTile()
+    } else {
+      historyMove.push(cloneTiles)
+      refactoryTile(getTile())
+    }
     if (isGameOver()) {
       alert('GameOver')
     }
   }
 
   function moveTileRow (tileRow: Array<Tile>, direction: string): void {
-    while (possibleMove(tileRow, direction)) {
-      calcTileNumber(tileRow)
-      calcTilePoint(tileRow, direction)
-      calcRemainPoint()
-    }
+    calcTileNumber(tileRow)
+    calcTilePoint(tileRow, direction)
+    calcRemainPoint()
   }
 
   function calcTileNumber (tileRow: Array<Tile>): void {
@@ -94,6 +99,7 @@
       if (cur.number === pre.number) {
         pre.number += cur.number
         cur.isDelete = true
+        score += pre.number
       }
     }
   }
@@ -147,7 +153,6 @@
     return result
   }
 
-  // TODO: GameOver 조건 구현
   function isGameOver (): boolean {
     let isPossibleMove = false
     const groupRight = directionTileGroup('right')
@@ -182,23 +187,18 @@
     for (const [key, tiles] of Object.entries(tileGroup)) {
       tiles.sort((a, b) => {
         if (direction === 'bottom') {
-          return b.point.getY() - a.point.getY();
+          return b.point.y - a.point.y;
         } else if (direction === 'top') {
-          return a.point.getY() - b.point.getY();
+          return a.point.y - b.point.y;
         } else if (direction === 'right') {
-          return b.point.getX() - a.point.getX();
+          return b.point.x - a.point.x;
         } else if (direction === 'left') {
-          return a.point.getX() - b.point.getX();
+          return a.point.x - b.point.x;
         }
       })
     }
 
     return tileGroup;
-  }
-
-  for (const prefix of ['A', 'B', /*'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'*/]) {
-    const newTile = getTile(prefix)
-    tiles = [...tiles, newTile]
   }
 </script>
 
@@ -216,6 +216,7 @@
     height: $box;
     box-sizing: border-box;
     margin: auto;
+    user-select: none;
   }
   .grid-container {
     position: absolute;
@@ -258,6 +259,9 @@
 
 <svelte:window on:keydown={handleKeydown}/>
 
+<div class="score-container">
+  {score}
+</div>
 <div class="game-container">
   <div class="grid-container">
     {#each gridCount as row}

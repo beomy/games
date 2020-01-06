@@ -1,16 +1,10 @@
 <script lang="ts">
   import GameCard from '@/components/GameCard.svelte'
 
-  interface GameSummary {
-    link: String;
-    image: String;
-    text: String;
-  }
-
-  let games: Array<GameSummary> = [{
-    link: '/',
-    image: '/images/logo.png',
-    text: 'TEST'
+  let games: Array<Object> = [{
+    link: '#/2048Game',
+    image: '/images/2048_logo.png',
+    text: '2048'
   }];
 </script>
 

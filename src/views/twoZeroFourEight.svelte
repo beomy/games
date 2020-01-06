@@ -47,7 +47,7 @@
     }
   }
 
-  function refactoryTile (newTile) {
+  function refactoryTile (newTile: Tile = null) {
     if (newTile) {
       tiles = [ ...tiles, newTile, ];
     }
@@ -181,8 +181,8 @@
 
   function directionTileGroup (direction: string): Object {
     const tileGroup = ['top', 'bottom'].includes(direction)
-      ? array.groupBy(tiles, 'point.x')
-      : array.groupBy(tiles, 'point.y')
+      ? _.groupBy(tiles, 'point.x')
+      : _.groupBy(tiles, 'point.y')
 
     for (const [key, tiles] of Object.entries(tileGroup)) {
       tiles.sort((a, b) => {

@@ -8,6 +8,9 @@
   }];
 </script>
 
+<style lang="scss">
+</style>
+
 {#each games as game, i (i)}
   <GameCard {game} />
 {/each}

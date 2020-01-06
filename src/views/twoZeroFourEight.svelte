@@ -1,7 +1,7 @@
 <script lang="ts">
   import _ from 'lodash'
   import { Tile, Point } from '@/@types'
-  import { number, array } from '@/utils'
+  import { number } from '@/utils'
   import TitleCell from '@/components/twoZeroFourEight/Tile.svelte'
 
   const rowCount = 4;
@@ -20,7 +20,7 @@
     }
 
     for (const prefix of ['A', 'B']) {
-      const newTile = getTile(prefix)
+      const newTile = getTile(prefix, 2)
       tiles = [...tiles, newTile]
     }
   })()
@@ -37,11 +37,10 @@
     }
   }
 
-  function getTile (prefix: any = null): Tile {
+  function getTile (prefix: any = null, fixNumber: Number = null): Tile {
     const remainPoint = popRemainPoint();
     if (remainPoint) {
-      // TODO: 2점, 4점 확률 적용해야 함
-      return new Tile(prefix, 2, remainPoint);
+      return new Tile(prefix, fixNumber ? fixNumber : number.ratioRandom([2, 4], [8, 2]), remainPoint);
     } else {
       return null;
     }

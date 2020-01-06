@@ -11,24 +11,8 @@ export default class Point {
     }
   }
 
-  getX () {
-    return this.x
-  }
-
-  getY () {
-    return this.y
-  }
-
   set (x, y) {
     this.x = x;
-    this.y = y;
-  }
-
-  setX (x) {
-    this.x = x;
-  }
-
-  setY (y) {
     this.y = y;
   }
 }

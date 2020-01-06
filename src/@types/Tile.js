@@ -3,8 +3,7 @@ export default class Tile {
     this.id = prefix ? `${prefix}${Date.now()}` : Date.now()
     this.number = number;
     this.point = point;
-    this.score = 0;
-    this.isDup = false;
+    this.isDelete = false;
   }
 
   getPos () {
@@ -19,9 +18,5 @@ export default class Tile {
   }
   setNumber (number) {
     this.number = number;
-  }
-
-  getScore () {
-    return this.score;
   }
 }

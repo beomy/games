@@ -1,7 +1,8 @@
 <script lang="ts">
   import { fade } from 'svelte/transition';
+  import { Tile } from '@/@types'
 
-  export let tile;
+  export let tile: Tile;
 
   $: point = tile.point.get()
 </script>
@@ -66,7 +67,7 @@
 
 <div
   class="tile tile-{tile.number} position-{point.x}-{point.y}"
-  in:fade="{{ duration: 100 }}"
+  in:fade="{{ delay: 100, duration: 100 }}"
 >
   <div class="tile-inner">{tile.number}</div>
 </div>

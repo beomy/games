@@ -1,12 +1,16 @@
 <script lang="ts">
+  import _ from 'lodash'
   import { Tile, Point } from '@/@types'
-  import { number, array } from '@/utils'
+  import { number } from '@/utils'
   import TitleCell from '@/components/twoZeroFourEight/Tile.svelte'
 
   const rowCount = 4;
-  let remainPoint: Array<String> = [];
   const gridCount: Array<Number> = [];
-  
+  let remainPoint: Array<string> = [];
+  let tiles: Array<Tile> = [];
+  const historyMove: Array<Array<Tile>> = [];
+  let score = 0;
+
   (function init (): void {
     for (let i = 1; i <= rowCount; i++) {
       for (let j = 1; j <= rowCount; j++) {
@@ -14,10 +18,17 @@
       }
       gridCount.push(i);
     }
+
+    for (const prefix of ['A', 'B']) {
+      const newTile = getTile(prefix, 2)
+      tiles = [...tiles, newTile]
+    }
   })()
 
-  function popRemainPoint (): Point {
-    const index = number.random(0, remainPoint.length - 1);
+  function popRemainPoint (point: string = null): Point {
+    let index = remainPoint.indexOf(point) >= 0
+      ? remainPoint.indexOf(point)
+      : number.random(0, remainPoint.length - 1);
     const item = remainPoint.splice(index, 1).pop();
     if (item) {
       return new Point(Number(item.split(',')[0]), Number(item.split(',')[1]));
@@ -26,20 +37,21 @@
     }
   }
 
-  function getTile (prefix: any): Tile {
+  function getTile (prefix: any = null, fixNumber: Number = null): Tile {
     const remainPoint = popRemainPoint();
     if (remainPoint) {
-      // TODO: 2점, 4점 확률 적용해야 함
-      return new Tile(prefix, 2, remainPoint);
+      return new Tile(prefix, fixNumber ? fixNumber : number.ratioRandom([2, 4], [8, 2]), remainPoint);
     } else {
       return null;
     }
   }
 
-  function pushTile (newTile) {
-    tiles = [ ...tiles, newTile, ];
+  function refactoryTile (newTile: Tile = null) {
+    if (newTile) {
+      tiles = [ ...tiles, newTile, ];
+    }
     setTimeout(() => {
-      tiles = tiles.filter(x => !x.isDup);
+      tiles = tiles.filter(x => !x.isDelete);
     }, 100)
   }
 
@@ -55,112 +67,138 @@
     }
   }
 
-  function moveTile (direction: String): void {
+  function moveTile (direction: string): void {
+    const cloneTiles = _.cloneDeep(tiles)
     const tileGroup = directionTileGroup(direction);
-    for (const [key, tiles] of Object.entries(tileGroup)) {
-      moveStack(tiles, direction);
+    for (const [key, tileRow] of Object.entries(tileGroup)) {
+      moveTileRow(tileRow, direction);
     }
 
-    // TODO: 이전 타일 모양과 다를 경우만 가져오도록 해야 함
-    const newTile = getTile();
-    if (newTile) {
-      pushTile(newTile)
+    if (_.isEqual(cloneTiles, tiles)) {
+      refactoryTile()
+    } else {
+      historyMove.push(cloneTiles)
+      refactoryTile(getTile())
     }
     if (isGameOver()) {
-      // TODO: GameOver 화면 구현
+      alert('GameOver')
     }
-    console.log(remainPoint)
   }
 
-  // TODO: 미완성, 버그 수정 필요
-  function moveStack (tileGroup: Array<Tile>, direction: String): void {
-    const isAsc: Boolean = ['top', 'left'].includes(direction);
-    const pointField: String = ['top', 'bottom'].includes(direction) ? 'y' : 'x';
-
-    if (isAsc) {
-
-    } else {
-      for (const tile of tileGroup) {
-        const index = tileGroup.indexOf(tile)
-        if (index === 0) {
-          tile.point[pointField] = rowCount
-        } else {
-          const preTile = tileGroup[index - 1]
-          let point = preTile.point[pointField] - 1 > 0
-              ? preTile.point[pointField] - 1
-              : 1
-          if (tile.number === preTile.number) {
-            point = preTile.point[pointField]
-            preTile.number += tile.number;
-            tile.isDup = true;
-          }
-          tile.point[pointField] = point
-        }
-      }
-    }
-
+  function moveTileRow (tileRow: Array<Tile>, direction: string): void {
+    calcTileNumber(tileRow)
+    calcTilePoint(tileRow, direction)
     calcRemainPoint()
   }
 
-  // TODO: GameOver 조건 구현
-  function isGameOver (): Boolean {
-    return false
+  function calcTileNumber (tileRow: Array<Tile>): void {
+    for (let index = 1; index < tileRow.length; index++) {
+      const cur = tileRow[index]
+      const pre = getPrevTile(tileRow, index)
+      if (cur.number === pre.number) {
+        pre.number += cur.number
+        cur.isDelete = true
+        score += pre.number
+      }
+    }
   }
 
-  // TODO: $ 문법 사용할 수 있는 방법 고민
+  function calcTilePoint (tileRow: Array<Tile>, direction: string): void {
+    const isAsc: boolean = ['top', 'left'].includes(direction);
+    const pointField: string = ['top', 'bottom'].includes(direction) ? 'y' : 'x';
+    const startPoint = isAsc ? 1 : rowCount
+    const moveDirection = isAsc ? 1 : -1
+    for (const cur of tileRow) {
+      const index = tileRow.indexOf(cur)
+      const pre = getPrevTile(tileRow, index)
+      if (index === 0) {
+        cur.point[pointField] = startPoint
+      } else {
+        cur.point[pointField] = cur.isDelete
+          ? pre.point[pointField]
+          : pre.point[pointField] + moveDirection
+      }
+    }
+  }
+
+  function getPrevTile(tileRow: Array<Tile>, index: Number) {
+    return tileRow.filter((x, i) => i < index && !x.isDelete).pop()
+  }
+
+  function possibleMove (tileRow: Array<Tile>, direction: string): boolean {
+    const isAsc: boolean = ['top', 'left'].includes(direction);
+    const pointField: string = ['top', 'bottom'].includes(direction) ? 'y' : 'x';
+
+    const startPoint = isAsc ? 1 : rowCount
+    const moveDirection = isAsc ? 1 : -1
+
+    let result = false
+    for (const cur of tileRow.filter(x => !x.isDelete)) {
+      const index = tileRow.indexOf(cur)
+      const pre = getPrevTile(tileRow, index)
+
+      if (index === 0 || !pre) {
+        if (cur.point[pointField] !== startPoint) {
+          result = true
+        }
+      } else {
+        if (cur.number === pre.number) {
+          result = true
+        } else if (cur.point[pointField] !== pre.point[pointField] + moveDirection) {
+          result = true
+        }
+      }
+    }
+    return result
+  }
+
+  function isGameOver (): boolean {
+    let isPossibleMove = false
+    const groupRight = directionTileGroup('right')
+    for (const [key, tiles] of Object.entries(groupRight)) {
+      isPossibleMove = isPossibleMove || possibleMove(tiles, 'right');
+    }
+    const groupBottom = directionTileGroup('bottom')
+    for (const [key, tiles] of Object.entries(groupBottom)) {
+      isPossibleMove = isPossibleMove || possibleMove(tiles, 'bottom');
+    }
+    return !isPossibleMove && remainPoint.length === 0
+  }
+
   function calcRemainPoint (): void {
-    const ref: Array<String> = []
+    const ref: Array<string> = []
     for (let i = 1; i <= rowCount; i++) {
       for (let j = 1; j <= rowCount; j++) {
         ref.push(`${i},${j}`);
       }
     }
-    for (const tile of tiles.filter(x => !x.isDup)) {
+    for (const tile of tiles.filter(x => !x.isDelete)) {
       ref.splice(ref.indexOf(`${tile.point.x},${tile.point.y}`), 1)
     }
     remainPoint = ref
   }
 
-  function directionTileGroup (direction: String): Object {
-    let tileGroup = [];
-
-    if (['top', 'bottom'].includes(direction)) {
-      tileGroup = array.groupBy(tiles, 'point.x');
-    } else {
-      tileGroup = array.groupBy(tiles, 'point.y');
-    }
+  function directionTileGroup (direction: string): Object {
+    const tileGroup = ['top', 'bottom'].includes(direction)
+      ? _.groupBy(tiles, 'point.x')
+      : _.groupBy(tiles, 'point.y')
 
     for (const [key, tiles] of Object.entries(tileGroup)) {
       tiles.sort((a, b) => {
         if (direction === 'bottom') {
-          return b.point.getY() - a.point.getY();
+          return b.point.y - a.point.y;
         } else if (direction === 'top') {
-          return a.point.getY() - b.point.getY();
+          return a.point.y - b.point.y;
         } else if (direction === 'right') {
-          return b.point.getX() - a.point.getX();
+          return b.point.x - a.point.x;
         } else if (direction === 'left') {
-          return a.point.getX() - b.point.getX();
+          return a.point.x - b.point.x;
         }
       })
     }
 
     return tileGroup;
-  },
-
-  let tiles: Array<Tile> = [
-    getTile('F'),
-    getTile('S'),
-    getTile('Q'),
-    getTile('W'),
-    getTile('E'),
-    getTile('R'),
-    getTile('T'),
-    getTile('Y'),
-    getTile('U'),
-    getTile('I'),
-    getTile('O'),
-    getTile('P'),
-  ];
+  }
 </script>
 
 <style lang="scss">
@@ -177,6 +215,7 @@
     height: $box;
     box-sizing: border-box;
     margin: auto;
+    user-select: none;
   }
   .grid-container {
     position: absolute;
@@ -219,6 +258,9 @@
 
 <svelte:window on:keydown={handleKeydown}/>
 
+<div class="score-container">
+  {score}
+</div>
 <div class="game-container">
   <div class="grid-container">
     {#each gridCount as row}

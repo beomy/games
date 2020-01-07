@@ -4,7 +4,7 @@
 
   export let tile: Tile;
 
-  $: point = tile.point.get()
+  $: point = { x: tile.point.x, y: tile.point.y }
 </script>
 
 <style lang="scss">

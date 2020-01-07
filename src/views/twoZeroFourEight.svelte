@@ -1,15 +1,39 @@
 <script lang="ts">
   import _ from 'lodash'
   import { Tile, Point } from '@/@types'
-  import { number } from '@/utils'
+  import * as utils from '@/utils'
   import TitleCell from '@/components/twoZeroFourEight/Tile.svelte'
+  import GameScore from '@/components/GameScore.svelte'
 
   const rowCount = 4;
-  const gridCount: Array<Number> = [];
+  const gridCount: Array<number> = [];
+  let historyMove: Array<Array<Tile>> = [];
+  let historyScore: Array<number> = [];
   let remainPoint: Array<string> = [];
   let tiles: Array<Tile> = [];
-  const historyMove: Array<Array<Tile>> = [];
-  let score = 0;
+  let score: number = 0;
+  let bestScore: number = 0;
+  let additionScore: number = 0;
+
+  $: if (historyScore.length === 1) {
+    additionScore = historyScore[historyScore.length - 1]
+  } else if (historyScore.length > 1) {
+    additionScore = historyScore[historyScore.length - 1] - historyScore[historyScore.length - 2]
+  }
+
+  $: {
+    const storage = getStorage('2048Game')
+    storage.results = historyMove;
+    storage.score = historyScore;
+    storage.best = Math.max(bestScore, storage.best);
+    localStorage.setItem('2048Game', JSON.stringify(storage));
+  }
+
+  $: {
+    historyMove = [ ...historyMove, tiles ]
+    historyScore = [ ...historyScore, score ]
+    bestScore = Math.max(bestScore, historyScore[historyScore.length - 1])
+  }
 
   (function init (): void {
     for (let i = 1; i <= rowCount; i++) {
@@ -18,17 +42,33 @@
       }
       gridCount.push(i);
     }
+    const storage = getStorage('2048Game');
+    historyMove = storage.results
+    historyScore = storage.score
+    bestScore = storage.best
 
-    for (const prefix of ['A', 'B']) {
-      const newTile = getTile(prefix, 2)
-      tiles = [...tiles, newTile]
+    if (historyMove.length > 0) {
+      tiles = historyMove[historyMove.length - 1]
+    } else {
+      for (const prefix of ['A', 'B']) {
+        const newTile = getTile(prefix, 2)
+        tiles = [...tiles, newTile]
+      }
+    }
+
+    if (historyScore.length > 0) {
+      score = historyScore[historyScore.length - 1]
     }
   })()
+
+  function getStorage (field = '2048Game') {
+    return JSON.parse(localStorage.getItem('2048Game')) || { results: [], score: [], best: 0 };
+  }
 
   function popRemainPoint (point: string = null): Point {
     let index = remainPoint.indexOf(point) >= 0
       ? remainPoint.indexOf(point)
-      : number.random(0, remainPoint.length - 1);
+      : utils.number.random(0, remainPoint.length - 1);
     const item = remainPoint.splice(index, 1).pop();
     if (item) {
       return new Point(Number(item.split(',')[0]), Number(item.split(',')[1]));
@@ -37,10 +77,10 @@
     }
   }
 
-  function getTile (prefix: any = null, fixNumber: Number = null): Tile {
+  function getTile (prefix: any = null, fixNumber: number = null): Tile {
     const remainPoint = popRemainPoint();
     if (remainPoint) {
-      return new Tile(prefix, fixNumber ? fixNumber : number.ratioRandom([2, 4], [8, 2]), remainPoint);
+      return new Tile(prefix, fixNumber ? fixNumber : utils.number.ratioRandom([2, 4], [8, 2]), remainPoint);
     } else {
       return null;
     }
@@ -74,12 +114,7 @@
       moveTileRow(tileRow, direction);
     }
 
-    if (_.isEqual(cloneTiles, tiles)) {
-      refactoryTile()
-    } else {
-      historyMove.push(cloneTiles)
-      refactoryTile(getTile())
-    }
+    refactoryTile(_.isEqual(cloneTiles, tiles) ? null : getTile())
     if (isGameOver()) {
       alert('GameOver')
     }
@@ -121,7 +156,7 @@
     }
   }
 
-  function getPrevTile(tileRow: Array<Tile>, index: Number) {
+  function getPrevTile(tileRow: Array<Tile>, index: number) {
     return tileRow.filter((x, i) => i < index && !x.isDelete).pop()
   }
 
@@ -217,6 +252,11 @@
     margin: auto;
     user-select: none;
   }
+  .scores-container {
+    width: $box;
+    margin: auto auto 10px auto;
+    text-align: right;
+  }
   .grid-container {
     position: absolute;
     z-index: 1;
@@ -245,6 +285,9 @@
       width: $smBox;
       height: $smBox;
     }
+    .scores-container {
+      width: $smBox;
+    }
     .grid-row {
       margin-bottom: $smSpace;
     }
@@ -258,8 +301,12 @@
 
 <svelte:window on:keydown={handleKeydown}/>
 
-<div class="score-container">
-  {score}
+<div class="scores-container">
+  <GameScore
+    {score} 
+    best={bestScore}
+    addition={additionScore}
+  />
 </div>
 <div class="game-container">
   <div class="grid-container">

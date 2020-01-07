@@ -11,6 +11,5 @@ export function ratioRandom (values, ratios) {
       list.push(value)
     }
   }
-  console.log(list)
   return list[random(0, list.length - 1)]
 }

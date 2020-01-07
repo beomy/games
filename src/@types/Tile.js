@@ -5,18 +5,4 @@ export default class Tile {
     this.point = point;
     this.isDelete = false;
   }
-
-  getPos () {
-    return this.point;
-  }
-  setPos (point) {
-    this.point = point;
-  }
-
-  getNumber () {
-    return this.number;
-  }
-  setNumber (number) {
-    this.number = number;
-  }
 }

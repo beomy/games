@@ -262,9 +262,13 @@
   function newGame (): void {
     historyMove = []
     historyScore = []
-    tiles = [ getTile('A', 2), getTile('B', 2) ]
+    tiles = []
     score = 0
     calcRemainPoint()
+    for (const prefix of ['A', 'B']) {
+      const newTile = getTile(prefix, 2)
+      tiles = [...tiles, newTile]
+    }
   }
 </script>
 

@@ -4,6 +4,7 @@
   import * as utils from '@/utils'
   import TitleCell from '@/components/twoZeroFourEight/Tile.svelte'
   import GameScore from '@/components/GameScore.svelte'
+  import GameNavigation from '@/components/GameNavigation.svelte'
 
   const rowCount = 4;
   const gridCount: Array<number> = [];
@@ -93,16 +94,15 @@
     }
   }
 
-  function refactoryTile (newTile: Tile = null) {
-    if (newTile) {
-      tiles = [ ...tiles, newTile, ];
+  function refactoryTile () {
+    const compactTiles = tiles.filter(x => !x.isDelete)
+    if (tiles.length !== compactTiles.length) {
+      tiles = compactTiles;
     }
-    setTimeout(() => {
-      const compactTiles = tiles.filter(x => !x.isDelete)
-      if (tiles.length !== compactTiles.length) {
-        tiles = compactTiles;
-      }
-    }, 100)
+  }
+
+  function pushTile (tile) {
+    tiles = [ ...tiles, tile ]
   }
 
   function handleKeydown ({ keyCode }): void {
@@ -118,13 +118,17 @@
   }
 
   function moveTile (direction: string): void {
+    refactoryTile()
+
     const cloneTiles = _.cloneDeep(tiles)
     const tileGroup = directionTileGroup(direction);
     for (const [key, tileRow] of Object.entries(tileGroup)) {
       moveTileRow(tileRow, direction);
     }
 
-    refactoryTile(_.isEqual(cloneTiles, tiles) ? null : getTile())
+    if (!_.isEqual(cloneTiles, tiles)) {
+      pushTile(getTile())
+    }
     if (isGameOver()) {
       alert('GameOver')
     }
@@ -244,6 +248,24 @@
 
     return tileGroup;
   }
+
+  function prevCancel (): void {
+    if (historyMove.length > 1) {
+      tiles = _.cloneDeep(historyMove[historyMove.length - 2])
+      score = historyScore[historyScore.length - 2]
+      historyMove.length = historyMove.length - 1
+      historyScore.length = historyScore.length - 1
+      calcRemainPoint()
+    }
+  }
+
+  function newGame (): void {
+    historyMove = []
+    historyScore = []
+    tiles = [ getTile('A', 2), getTile('B', 2) ]
+    score = 0
+    calcRemainPoint()
+  }
 </script>
 
 <style lang="scss">
@@ -267,6 +289,11 @@
     width: $box;
     margin: auto auto 10px auto;
     text-align: right;
+  }
+  .navigation-container {
+    width: $box;
+    text-align: right;
+    margin: 10px auto auto auto;
   }
   .grid-container {
     position: absolute;
@@ -296,7 +323,7 @@
       width: $smBox;
       height: $smBox;
     }
-    .scores-container {
+    .scores-container, .navigation-container {
       width: $smBox;
     }
     .grid-row {
@@ -335,4 +362,10 @@
       <TitleCell {tile} />
     {/each}
   </div>
+</div>
+<div class="navigation-container">
+  <GameNavigation
+    on:prevCancel={prevCancel}
+    on:newGame={newGame}
+  />
 </div>

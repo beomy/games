@@ -28,6 +28,10 @@
     line-height: ceil($cell);
   }
 
+  .merged {
+    z-index: -1;
+  }
+
   .tile-inner {
     background: #eee4da;
     line-height: ceil($cell);
@@ -66,7 +70,7 @@
 </style>
 
 <div
-  class="tile tile-{tile.number} position-{point.x}-{point.y}"
+  class="tile tile-{tile.number} position-{point.x}-{point.y} {tile.isDelete ? 'merged' : ''}"
   in:fade="{{ delay: 100, duration: 100 }}"
 >
   <div class="tile-inner">{tile.number}</div>

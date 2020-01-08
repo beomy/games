@@ -23,17 +23,19 @@
   }
 
   $: {
-    const storage = getStorage('2048Game')
-    storage.results = historyMove;
-    storage.score = historyScore;
-    storage.best = Math.max(bestScore, storage.best);
-    localStorage.setItem('2048Game', JSON.stringify(storage));
+    setStorage('2048Game', {
+      results: historyMove,
+      score: historyScore,
+      best: bestScore
+    })
   }
 
   $: {
-    historyMove = [ ...historyMove, tiles ]
-    historyScore = [ ...historyScore, score ]
-    bestScore = Math.max(bestScore, historyScore[historyScore.length - 1])
+    if (!_.isEqual(historyMove[historyMove.length - 1], tiles)) {
+      historyMove = [ ...historyMove, tiles ]
+      historyScore = [ ...historyScore, score ]
+      bestScore = Math.max(bestScore, historyScore[historyScore.length - 1])
+    }
   }
 
   (function init (): void {
@@ -43,6 +45,7 @@
       }
       gridCount.push(i);
     }
+
     const storage = getStorage('2048Game');
     historyMove = storage.results
     historyScore = storage.score
@@ -62,8 +65,12 @@
     }
   })()
 
-  function getStorage (field = '2048Game') {
-    return JSON.parse(localStorage.getItem('2048Game')) || { results: [], score: [], best: 0 };
+  function getStorage (field: any = '2048Game'): any {
+    return JSON.parse(localStorage.getItem(field)) || { results: [], score: [], best: 0 };
+  }
+
+  function setStorage (field: any = '2048Game', data): void {
+    localStorage.setItem(field, JSON.stringify(data));
   }
 
   function popRemainPoint (point: string = null): Point {
@@ -92,7 +99,10 @@
       tiles = [ ...tiles, newTile, ];
     }
     setTimeout(() => {
-      tiles = tiles.filter(x => !x.isDelete);
+      const compactTiles = tiles.filter(x => !x.isDelete)
+      if (tiles.length !== compactTiles.length) {
+        tiles = compactTiles;
+      }
     }, 100)
   }
 

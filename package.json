@@ -21,6 +21,7 @@
     "dev": "webpack-dev-server --content-base public"
   },
   "dependencies": {
+    "hammerjs": "^2.0.8",
     "lodash": "^4.17.15",
     "svelte-spa-router": "^2.0.0"
   }

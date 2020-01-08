@@ -4,6 +4,7 @@
   import * as utils from '@/utils'
   import TitleCell from '@/components/twoZeroFourEight/Tile.svelte'
   import GameScore from '@/components/GameScore.svelte'
+  import GameNavigation from '@/components/GameNavigation.svelte'
 
   const rowCount = 4;
   const gridCount: Array<number> = [];
@@ -234,6 +235,16 @@
 
     return tileGroup;
   }
+
+  function prevCancel (): void {
+    tiles = historyMove.pop()
+    score = historyScore.pop()
+  }
+
+  function newGame (): void {
+    tiles = []
+    score = 0
+  }
 </script>
 
 <style lang="scss">
@@ -256,6 +267,11 @@
     width: $box;
     margin: auto auto 10px auto;
     text-align: right;
+  }
+  .navigation-container {
+    width: $box;
+    text-align: right;
+    margin: 10px auto auto auto;
   }
   .grid-container {
     position: absolute;
@@ -285,7 +301,7 @@
       width: $smBox;
       height: $smBox;
     }
-    .scores-container {
+    .scores-container, .navigation-container {
       width: $smBox;
     }
     .grid-row {
@@ -323,4 +339,10 @@
       <TitleCell {tile} />
     {/each}
   </div>
+</div>
+<div class="navigation-container">
+  <GameNavigation
+    on:prevCancel={prevCancel}
+    on:newGame={newGame}
+  />
 </div>

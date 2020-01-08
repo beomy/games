@@ -31,7 +31,7 @@
 
   $: {
     if (!_.isEqual(historyMove[historyMove.length - 1], tiles)) {
-      historyMove = [ ...historyMove, tiles ]
+      historyMove = [ ...historyMove, _.cloneDeep(tiles) ]
       historyScore = [ ...historyScore, score ]
       bestScore = Math.max(bestScore, historyScore[historyScore.length - 1])
     }

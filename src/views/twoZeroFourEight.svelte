@@ -247,13 +247,21 @@
   }
 
   function prevCancel (): void {
-    tiles = historyMove.pop()
-    score = historyScore.pop()
+    if (historyMove.length > 1) {
+      tiles = JSON.parse(JSON.stringify(historyMove[historyMove.length - 2]))
+      score = historyScore[historyScore.length - 2]
+      historyMove.length = historyMove.length - 1
+      historyScore.length = historyScore.length - 1
+      calcRemainPoint()
+    }
   }
 
   function newGame (): void {
-    tiles = []
+    historyMove = []
+    historyScore = []
+    tiles = [ getTile('A', 2), getTile('B', 2) ]
     score = 0
+    calcRemainPoint()
   }
 </script>
 

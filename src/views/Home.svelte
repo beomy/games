@@ -3,7 +3,7 @@
 
   let games: Array<Object> = [{
     link: '#/2048Game',
-    image: '/images/2048_logo.png',
+    image: './images/2048_logo.png',
     text: '2048'
   }];
 </script>

@@ -13,11 +13,11 @@
 
 <a class="logo-link" href="/" target="_blank">
   <div class="logo-img-box">
-    <img src="images/logo.png" alt="로고" />
+    <img src="./images/logo.png" alt="로고" />
   </div>
 </a>
 <a class="logo-link" href="/">
   <div class="logo-img-box">
-    <img src="images/games_logo.png" alt="게임 로고" />
+    <img src="./images/games_logo.png" alt="게임 로고" />
   </div>
 </a>

@@ -45,7 +45,7 @@
     class="undo"
     on:click={prevCancel}
   >
-    <img src="/images/undo.svg" alt="실행취소">
+    <img src="./images/undo.svg" alt="실행취소">
   </div>
   <button
     type="button"

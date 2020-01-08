@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import _ from 'lodash'
+  import Hammer from 'hammerjs'
   import { Tile, Point } from '@/@types'
   import * as utils from '@/utils'
   import TitleCell from '@/components/twoZeroFourEight/Tile.svelte'
@@ -15,6 +17,7 @@
   let score: number = 0;
   let bestScore: number = 0;
   let additionScore: number = 0;
+  let gameContainer: any;
 
   $: if (historyScore.length === 1) {
     additionScore = historyScore[historyScore.length - 1]
@@ -37,6 +40,15 @@
       bestScore = Math.max(bestScore, historyScore[historyScore.length - 1])
     }
   }
+
+  onMount(() => {
+    const gameController = new Hammer(gameContainer);
+    gameController.get('swipe').set({ direction: Hammer.DIRECTION_ALL })
+    gameController.on('swipeleft', (event) => { moveTile('left'); })
+    gameController.on('swiperight', (event) => { moveTile('right'); })
+    gameController.on('swipeup', (event) => { moveTile('top'); })
+    gameController.on('swipedown', (event) => { moveTile('bottom'); })
+  });
 
   (function init (): void {
     for (let i = 1; i <= rowCount; i++) {
@@ -63,7 +75,7 @@
     if (historyScore.length > 0) {
       score = historyScore[historyScore.length - 1]
     }
-  })()
+  })();
 
   function getStorage (field: any = '2048Game'): any {
     return JSON.parse(localStorage.getItem(field)) || { results: [], score: [], best: 0 };
@@ -347,7 +359,10 @@
     addition={additionScore}
   />
 </div>
-<div class="game-container">
+<div
+  class="game-container"
+  bind:this={gameContainer}
+>
   <div class="grid-container">
     {#each gridCount as row}
       <div class="grid-row">

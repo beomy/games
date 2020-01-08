@@ -1,6 +1,7 @@
 <script lang="ts">
   import { fade, fly } from 'svelte/transition';
 
+  export let title: string;
   export let score: Number;
   export let best: Number;
   export let addition: Number;
@@ -44,8 +45,21 @@
     color: rgba(119, 110, 101, 0.9);
     top: 23px;
   }
+  .game-title {
+    display: inline-block;
+    height: 80px;
+    line-height: 80px;
+    float: left;
+    h1 {
+      font-weight: bolder;
+      font-size: 80px;
+    }
+  }
 </style>
 
+<div class="game-title">
+  <h1>{title}</h1>
+</div>
 <div class="score-container">
   <div class="title">SCORE</div>
   <div class="score">{score}</div>

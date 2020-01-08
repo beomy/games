@@ -94,16 +94,15 @@
     }
   }
 
-  function refactoryTile (newTile: Tile = null) {
-    if (newTile) {
-      tiles = [ ...tiles, newTile, ];
+  function refactoryTile () {
+    const compactTiles = tiles.filter(x => !x.isDelete)
+    if (tiles.length !== compactTiles.length) {
+      tiles = compactTiles;
     }
-    setTimeout(() => {
-      const compactTiles = tiles.filter(x => !x.isDelete)
-      if (tiles.length !== compactTiles.length) {
-        tiles = compactTiles;
-      }
-    }, 100)
+  }
+
+  function pushTile (tile) {
+    tiles = [ ...tiles, tile ]
   }
 
   function handleKeydown ({ keyCode }): void {
@@ -119,13 +118,17 @@
   }
 
   function moveTile (direction: string): void {
+    refactoryTile()
+
     const cloneTiles = _.cloneDeep(tiles)
     const tileGroup = directionTileGroup(direction);
     for (const [key, tileRow] of Object.entries(tileGroup)) {
       moveTileRow(tileRow, direction);
     }
 
-    refactoryTile(_.isEqual(cloneTiles, tiles) ? null : getTile())
+    if (!_.isEqual(cloneTiles, tiles)) {
+      pushTile(getTile())
+    }
     if (isGameOver()) {
       alert('GameOver')
     }
@@ -248,7 +251,7 @@
 
   function prevCancel (): void {
     if (historyMove.length > 1) {
-      tiles = JSON.parse(JSON.stringify(historyMove[historyMove.length - 2]))
+      tiles = _.cloneDeep(historyMove[historyMove.length - 2])
       score = historyScore[historyScore.length - 2]
       historyMove.length = historyMove.length - 1
       historyScore.length = historyScore.length - 1

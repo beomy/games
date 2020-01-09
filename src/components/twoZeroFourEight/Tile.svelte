@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { fade } from 'svelte/transition';
   import { Tile } from '@/@types'
+  import { appear } from '@/transition'
 
   export let tile: Tile;
 
@@ -10,6 +10,12 @@
 <style lang="scss">
   @import "../../assets/sass/variables.scss";
   @import "../../assets/sass/variables_2048.scss";
+
+  @keyframes pop {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
 
   @for $i from 1 to 5 {
     @for $j from 1 to 5 {
@@ -28,31 +34,39 @@
     line-height: ceil($cell);
   }
 
-  .merged {
+  .delete {
     z-index: -1;
+  }
+  .merged {
+    .tile-inner {
+      animation: pop 200ms ease 100ms;
+    }
   }
 
   .tile-inner {
-    background: #eee4da;
+    background: #edc22e;
+    color: #f9f6f2;
     line-height: ceil($cell);
     border-radius: 3px;
     text-align: center;
     font-weight: bold;
     z-index: 10;
-    font-size: $font;
-    color: #776e65;
+    font-size: 25px;
   }
 
-  .tile-4 .tile-inner { background: #ede0c8; }
-  .tile-8 .tile-inner { background: #f2b179; color: #f9f6f2; }
-  .tile-16 .tile-inner { background: #f59563; color: #f9f6f2; }
-  .tile-32 .tile-inner { background: #f67c5f; color: #f9f6f2; }
-  .tile-64 .tile-inner { background: #f65e3b; color: #f9f6f2; }
-  .tile-128 .tile-inner { background: #edcf72; color: #f9f6f2; font-size: 45px; }
-  .tile-256 .tile-inner { background: #edcc61; color: #f9f6f2; font-size: 45px; }
-  .tile-512 .tile-inner { background: #edc850; color: #f9f6f2; font-size: 45px; }
-  .tile-1024 .tile-inner { background: #edc53f; color: #f9f6f2; font-size: 35px; }
-  .tile-2048 .tile-inner { background: #edc22e; color: #f9f6f2; font-size: 35px; }
+  .tile-2 .tile-inner { background: #eee4da; color: #776e65; font-size: $xlFont; }
+  .tile-4 .tile-inner { background: #ede0c8; color: #776e65; font-size: $xlFont; }
+  .tile-8 .tile-inner { background: #f2b179; color: #f9f6f2; font-size: $xlFont; }
+  .tile-16 .tile-inner { background: #f59563; color: #f9f6f2; font-size: $xlFont; }
+  .tile-32 .tile-inner { background: #f67c5f; color: #f9f6f2; font-size: $xlFont; }
+  .tile-64 .tile-inner { background: #f65e3b; color: #f9f6f2; font-size: $xlFont; }
+  .tile-128 .tile-inner { background: #edcf72; color: #f9f6f2; font-size: $lgFont; }
+  .tile-256 .tile-inner { background: #edcc61; color: #f9f6f2; font-size: $lgFont; }
+  .tile-512 .tile-inner { background: #edc850; color: #f9f6f2; font-size: $lgFont; }
+  .tile-1024 .tile-inner { background: #edc53f; color: #f9f6f2; font-size: $mdFont; }
+  .tile-2048 .tile-inner,
+  .tile-4096 .tile-inner,
+  .tile-8192 .tile-inner { font-size: $mdFont; }
 
   @media (max-width: $sm) {
     .tile {
@@ -64,21 +78,27 @@
       line-height: $smCell;
       font-size: $smFont;
     }
+    .tile-inner {
+      font-size: $xsFont;
+    }
+    .tile-2 .tile-inner,
     .tile-4 .tile-inner,
     .tile-8 .tile-inner,
     .tile-16 .tile-inner,
     .tile-32 .tile-inner,
     .tile-64 .tile-inner {
-      font-size: 35px;
+      font-size: $mdFont;
     }
     .tile-128 .tile-inner,
     .tile-256 .tile-inner,
     .tile-512 .tile-inner, {
-      font-size: 25px;
+      font-size: $smFont;
     }
     .tile-1024 .tile-inner,
-    .tile-2048 .tile-inner {
-      font-size: 15px;
+    .tile-2048 .tile-inner,
+    .tile-4096 .tile-inner,
+    .tile-8192 .tile-inner {
+      font-size: $xsFont;
     }
     @for $i from 1 to 5 {
       @for $j from 1 to 5 {
@@ -91,8 +111,15 @@
 </style>
 
 <div
-  class="tile tile-{tile.number} position-{point.x}-{point.y} {tile.isDelete ? 'merged' : ''}"
-  in:fade="{{ delay: 100, duration: 100 }}"
+  class="tile tile-{tile.number} position-{point.x}-{point.y}"
+  class:merged="{tile.isMerged}"
+  class:delete="{tile.isDelete}"
+  class:new="{tile.isNew}"
 >
-  <div class="tile-inner">{tile.number}</div>
+  <div
+    in:appear="{{ delay: 100, duration: 200 }}"
+    class="tile-inner"
+  >
+    {tile.number
+  }</div>
 </div>

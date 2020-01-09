@@ -26,7 +26,7 @@
   }
 
   $: {
-    setStorage('2048Game', {
+    utils.storage.setStorage('2048Game', {
       results: historyMove,
       score: historyScore,
       best: bestScore
@@ -43,11 +43,11 @@
 
   onMount(() => {
     const gameController = new Hammer(gameContainer);
-    gameController.get('swipe').set({ direction: Hammer.DIRECTION_ALL })
-    gameController.on('swipeleft', (event) => { moveTile('left'); })
-    gameController.on('swiperight', (event) => { moveTile('right'); })
-    gameController.on('swipeup', (event) => { moveTile('top'); })
-    gameController.on('swipedown', (event) => { moveTile('bottom'); })
+    gameController.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
+    gameController.on('swipeleft', () => { moveTile('left'); });
+    gameController.on('swiperight', () => { moveTile('right'); });
+    gameController.on('swipeup', () => { moveTile('top'); });
+    gameController.on('swipedown', () => { moveTile('bottom'); });
   });
 
   (function init (): void {
@@ -58,7 +58,7 @@
       gridCount.push(i);
     }
 
-    const storage = getStorage('2048Game');
+    const storage = utils.storage.getStorage('2048Game');
     historyMove = storage.results
     historyScore = storage.score
     bestScore = storage.best
@@ -77,14 +77,6 @@
     }
   })();
 
-  function getStorage (field: any = '2048Game'): any {
-    return JSON.parse(localStorage.getItem(field)) || { results: [], score: [], best: 0 };
-  }
-
-  function setStorage (field: any = '2048Game', data): void {
-    localStorage.setItem(field, JSON.stringify(data));
-  }
-
   function popRemainPoint (point: string = null): Point {
     let index = remainPoint.indexOf(point) >= 0
       ? remainPoint.indexOf(point)
@@ -97,8 +89,8 @@
     }
   }
 
-  function getTile (prefix: any = null, fixNumber: number = null): Tile {
-    const remainPoint = popRemainPoint();
+  function getTile (prefix: any = null, fixNumber: number = null, point: string = null): Tile {
+    const remainPoint = popRemainPoint(point);
     if (remainPoint) {
       return new Tile(prefix, fixNumber ? fixNumber : utils.number.ratioRandom([2, 4], [8, 2]), remainPoint);
     } else {
@@ -106,15 +98,17 @@
     }
   }
 
-  function refactoryTile () {
+  function refactoryTile (): void {
     const compactTiles = tiles.filter(x => !x.isDelete)
-    if (tiles.length !== compactTiles.length) {
-      tiles = compactTiles;
-    }
+    tiles = compactTiles.map(x => ({
+      ...x,
+      isMerged: false,
+      isNew: false
+    }));
   }
 
-  function pushTile (tile) {
-    tiles = [ ...tiles, tile ]
+  function pushTile (tile: Tile): void {
+    tiles = [ ...tiles, tile ];
   }
 
   function handleKeydown ({ keyCode }): void {
@@ -156,9 +150,10 @@
     for (let index = 1; index < tileRow.length; index++) {
       const cur = tileRow[index]
       const pre = getPrevTile(tileRow, index)
-      if (cur.number === pre.number) {
+      if (!pre.isMerged && cur.number === pre.number) {
         pre.number += cur.number
         cur.isDelete = true
+        pre.isMerged = true
         score += pre.number
       }
     }
@@ -272,6 +267,13 @@
   }
 
   function newGame (): void {
+    const refPoint = []
+    for (let i = 1; i <= rowCount; i++) {
+      for (let j = 1; j <= rowCount; j++) {
+        refPoint.push(`${i},${j}`);
+      }
+    }
+    remainPoint = refPoint
     historyMove = []
     historyScore = []
     tiles = []

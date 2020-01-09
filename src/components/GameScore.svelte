@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { fade, fly } from 'svelte/transition';
 
   export let title: string;
@@ -9,18 +10,25 @@
   let visible = false;
 
   $: if (addition !== 0) (
-    visible = true
+    visible = true;
   )
+
+  onMount(() => {
+    visible = false;
+  })
 </script>
 
 <style lang="scss">
+  @import "../assets/sass/variables.scss";
+
   .score-container, .best-container {
     position: relative;
     display: inline-block;
     background: #bbada0;
-    padding: 15px 25px;
+    padding: 5px 15px;
     font-size: 25px;
     height: 40px;
+    min-width: 40px;
     line-height: 40px;
     font-weight: bold;
     border-radius: 3px;
@@ -35,7 +43,7 @@
     color: #eee4da;
   }
   .score {
-    height: 35px;
+    height: 30px;
     line-height: 30px;
   }
   .addition {
@@ -47,12 +55,18 @@
   }
   .game-title {
     display: inline-block;
-    height: 80px;
-    line-height: 80px;
+    height: 55px;
+    line-height: 55px;
     float: left;
     h1 {
       font-weight: bolder;
-      font-size: 80px;
+      font-size: 55px;
+    }
+  }
+  @media (max-width: $sm) {
+    .game-title {
+      display: block;
+      float: none;
     }
   }
 </style>
@@ -63,7 +77,7 @@
 <div class="score-container">
   <div class="title">SCORE</div>
   <div class="score">{score}</div>
-  {#if visible && addition !== 0}
+  {#if visible}
     <div
       in:fade={{ duration: 100 }}
       out:fly="{{ y: -50, duration: 800 }}"

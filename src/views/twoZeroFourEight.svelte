@@ -34,7 +34,9 @@
   }
 
   $: {
-    if (!_.isEqual(historyMove[historyMove.length - 1], tiles)) {
+    const historyTiles = getCoreTileValue(historyMove[historyMove.length - 1])
+    const currentTiles = getCoreTileValue(tiles)
+    if (!_.isEqual(historyTiles, currentTiles)) {
       historyMove = [ ...historyMove, _.cloneDeep(tiles) ]
       historyScore = [ ...historyScore, score ]
       bestScore = Math.max(bestScore, historyScore[historyScore.length - 1])
@@ -76,6 +78,23 @@
       score = historyScore[historyScore.length - 1]
     }
   })();
+
+  function getCoreTileValue (target) {
+    if (target) {
+      return target.reduce((acc, cur) => {
+        if (!cur.isDelete) {
+          acc.push({
+            id: cur.id,
+            number: cur.number,
+            point: cur.point
+          })
+        }
+        return acc
+      }, [])
+    } else {
+      return []
+    }
+  }
 
   function popRemainPoint (point: string = null): Point {
     let index = remainPoint.indexOf(point) >= 0

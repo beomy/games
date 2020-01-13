@@ -1,12 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import _ from 'lodash'
-  import Hammer from 'hammerjs'
   import { Tile, Point } from '@/@types'
   import * as utils from '@/utils'
   import TitleCell from '@/components/twoZeroFourEight/Tile.svelte'
   import GameScore from '@/components/GameScore.svelte'
   import GameNavigation from '@/components/GameNavigation.svelte'
+  import { Hammer, swipe } from 'svelte-hammer'
 
   const rowCount = 4;
   const gridCount: Array<number> = [];
@@ -17,7 +17,6 @@
   let score: number = 0;
   let bestScore: number = 0;
   let additionScore: number = 0;
-  let gameContainer: any;
 
   $: if (historyScore.length === 1) {
     additionScore = historyScore[historyScore.length - 1]
@@ -42,15 +41,6 @@
       bestScore = Math.max(bestScore, historyScore[historyScore.length - 1])
     }
   }
-
-  onMount(() => {
-    const gameController = new Hammer(gameContainer);
-    gameController.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
-    gameController.on('swipeleft', () => { moveTile('left'); });
-    gameController.on('swiperight', () => { moveTile('right'); });
-    gameController.on('swipeup', () => { moveTile('top'); });
-    gameController.on('swipedown', () => { moveTile('bottom'); });
-  });
 
   (function init (): void {
     for (let i = 1; i <= rowCount; i++) {
@@ -382,7 +372,11 @@
 </div>
 <div
   class="game-container"
-  bind:this={gameContainer}
+  use:swipe={{ direction: Hammer.DIRECTION_ALL }}
+  on:swipeleft={() => moveTile('left')}
+  on:swiperight={() => moveTile('right')}
+  on:swipeup={() => moveTile('top')}
+  on:swipedown={() => moveTile('bottom')}
 >
   <div class="grid-container">
     {#each gridCount as row}

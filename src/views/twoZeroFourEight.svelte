@@ -10,6 +10,7 @@
 
   const rowCount = 4;
   const gridCount: Array<number> = [];
+  const refPoint: Array<number> = [];
   let historyMove: Array<Array<Tile>> = [];
   let historyScore: Array<number> = [];
   let remainPoint: Array<string> = [];
@@ -45,10 +46,11 @@
   (function init (): void {
     for (let i = 1; i <= rowCount; i++) {
       for (let j = 1; j <= rowCount; j++) {
-        remainPoint.push(`${i},${j}`);
+        refPoint.push(`${i},${j}`);
       }
       gridCount.push(i);
     }
+    remainPoint = _.cloneDeep(refPoint)
 
     const storage = utils.storage.getStorage('2048Game');
     historyMove = storage.results
@@ -276,13 +278,7 @@
   }
 
   function newGame (): void {
-    const refPoint = []
-    for (let i = 1; i <= rowCount; i++) {
-      for (let j = 1; j <= rowCount; j++) {
-        refPoint.push(`${i},${j}`);
-      }
-    }
-    remainPoint = refPoint
+    remainPoint = _.cloneDeep(refPoint)
     historyMove = []
     historyScore = []
     tiles = [ getTile('A', 2), getTile('B', 2) ]

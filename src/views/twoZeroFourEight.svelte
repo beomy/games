@@ -370,6 +370,11 @@
       height: $smCell;
       margin-right: $smSpace;
     }
+    .game-over {
+      > div {
+        font-size: 30px;
+      }
+    }
   }
 </style>
 

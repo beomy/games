@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { fade } from 'svelte/transition';
   import _ from 'lodash'
   import { Tile, Point } from '@/@types'
   import * as utils from '@/utils'
@@ -18,11 +19,25 @@
   let score: number = 0;
   let bestScore: number = 0;
   let additionScore: number = 0;
+  let isGameOver = false;
 
   $: if (historyScore.length === 1) {
     additionScore = historyScore[historyScore.length - 1]
   } else if (historyScore.length > 1) {
     additionScore = historyScore[historyScore.length - 1] - historyScore[historyScore.length - 2]
+  }
+
+  $: {
+    let isPossibleMove = false
+    const groupRight = directionTileGroup('right')
+    for (const [key, tiles] of Object.entries(groupRight)) {
+      isPossibleMove = isPossibleMove || possibleMove(tiles, 'right');
+    }
+    const groupBottom = directionTileGroup('bottom')
+    for (const [key, tiles] of Object.entries(groupBottom)) {
+      isPossibleMove = isPossibleMove || possibleMove(tiles, 'bottom');
+    }
+    isGameOver = !isPossibleMove && remainPoint.length === 0
   }
 
   $: {
@@ -146,9 +161,6 @@
     if (!_.isEqual(cloneTiles, tiles)) {
       pushTile(getTile())
     }
-    if (isGameOver()) {
-      alert('GameOver')
-    }
   }
 
   function moveTileRow (tileRow: Array<Tile>, direction: string): void {
@@ -217,19 +229,6 @@
       }
     }
     return result
-  }
-
-  function isGameOver (): boolean {
-    let isPossibleMove = false
-    const groupRight = directionTileGroup('right')
-    for (const [key, tiles] of Object.entries(groupRight)) {
-      isPossibleMove = isPossibleMove || possibleMove(tiles, 'right');
-    }
-    const groupBottom = directionTileGroup('bottom')
-    for (const [key, tiles] of Object.entries(groupBottom)) {
-      isPossibleMove = isPossibleMove || possibleMove(tiles, 'bottom');
-    }
-    return !isPossibleMove && remainPoint.length === 0
   }
 
   function calcRemainPoint (): void {
@@ -336,6 +335,24 @@
     z-index: 2;
   }
 
+  .game-over {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 3;
+    display: table;
+    > div {
+      display: table-cell;
+      vertical-align: middle;
+      text-align: center;
+      color: #fff;
+      font-size: 50px;
+    }
+  }
+
   @media (max-width: $sm) {
     .game-container {
       padding: $smSpace;
@@ -374,6 +391,14 @@
   on:swipeup={() => moveTile('top')}
   on:swipedown={() => moveTile('bottom')}
 >
+  {#if isGameOver}
+    <div
+      in:fade={{ duration: 100 }}
+      class="game-over"
+    >
+      <div>GAME OVER</div>
+    </div>
+  {/if}
   <div class="grid-container">
     {#each gridCount as row}
       <div class="grid-row">

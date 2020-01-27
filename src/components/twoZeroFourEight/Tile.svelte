@@ -114,7 +114,6 @@
   class="tile tile-{tile.number} position-{point.x}-{point.y}"
   class:merged="{tile.isMerged}"
   class:delete="{tile.isDelete}"
-  class:new="{tile.isNew}"
 >
   <div
     in:appear="{{ delay: 100, duration: 200 }}"

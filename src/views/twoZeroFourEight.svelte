@@ -128,8 +128,7 @@
     const compactTiles = tiles.filter(x => !x.isDelete)
     tiles = compactTiles.map(x => ({
       ...x,
-      isMerged: false,
-      isNew: false
+      isMerged: false
     }));
   }
 

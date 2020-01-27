@@ -5,6 +5,5 @@ export default class Tile {
     this.point = point;
     this.isDelete = false;
     this.isMerged = false;
-    this.isNew = true;
   }
 }

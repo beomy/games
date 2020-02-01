@@ -3,9 +3,33 @@
 </script>
 
 <style lang="scss">
-	@import "../assets/sass/variables.scss";
+  @import "../assets/sass/variables.scss";
 
-	@media (min-width: $xl) {
+  @media (min-width: $xs) {
+    .game-link {
+      width: 33.333%;
+    }
+  }
+
+  @media (min-width: $sm) {
+    .game-link {
+      width: 33.333%;
+    }
+  }
+
+  @media (min-width: $md) {
+    .game-link {
+      width: 33.333%;
+    }
+  }
+
+  @media (min-width: $lg) {
+    .game-link {
+      width: 20%;
+    }
+  }
+
+  @media (min-width: $xl) {
     .game-link {
       width: 20%;
     }

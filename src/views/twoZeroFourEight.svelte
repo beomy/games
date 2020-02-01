@@ -11,7 +11,7 @@
 
   const rowCount = 4;
   const gridCount: Array<number> = [];
-  const refPoint: Array<number> = [];
+  const refPoint: Array<string> = [];
   let historyMove: Array<Array<Tile>> = [];
   let historyScore: Array<number> = [];
   let remainPoint: Array<string> = [];
@@ -59,8 +59,8 @@
   }
 
   (function init (): void {
-    for (let i = 1; i <= rowCount; i++) {
-      for (let j = 1; j <= rowCount; j++) {
+    for (let i: number = 1; i <= rowCount; i++) {
+      for (let j: number = 1; j <= rowCount; j++) {
         refPoint.push(`${i},${j}`);
       }
       gridCount.push(i);
@@ -244,12 +244,12 @@
   }
 
   function directionTileGroup (direction: string): Object {
-    const tileGroup = ['top', 'bottom'].includes(direction)
+    const tileGroup: Object = ['top', 'bottom'].includes(direction)
       ? _.groupBy(tiles, 'point.x')
       : _.groupBy(tiles, 'point.y')
 
-    for (const [key, tiles] of Object.entries(tileGroup)) {
-      tiles.sort((a, b) => {
+    for (const [key, tileRow] of Object.entries(tileGroup)) {
+      tileRow.sort((a, b) => {
         if (direction === 'bottom') {
           return b.point.y - a.point.y;
         } else if (direction === 'top') {

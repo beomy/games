@@ -9,9 +9,9 @@
 
   let visible = false;
 
-  $: if (addition !== 0) (
+  $: if (addition !== 0) {
     visible = true;
-  )
+  }
 
   onMount(() => {
     visible = false;

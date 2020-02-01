@@ -1,9 +1,10 @@
 <script lang="ts">
-  import { Tile } from '@/@types'
+  import { Tile, Point } from '@/@types'
   import { appear } from '@/transition'
 
   export let tile: Tile;
 
+  let point: Point;
   $: point = { x: tile.point.x, y: tile.point.y }
 </script>
 

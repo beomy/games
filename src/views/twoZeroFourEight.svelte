@@ -1,34 +1,34 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { fade } from 'svelte/transition';
-  import _ from 'lodash'
-  import { Tile, Point } from '@/@types'
-  import * as utils from '@/utils'
-  import TitleCell from '@/components/twoZeroFourEight/Tile.svelte'
-  import GameScore from '@/components/GameScore.svelte'
-  import GameNavigation from '@/components/GameNavigation.svelte'
-  import { Hammer, swipe } from 'svelte-hammer'
+  import _ from 'lodash';
+  import { Tile, Point } from '@/@types';
+  import * as utils from '@/utils';
+  import TitleCell from '@/components/twoZeroFourEight/Tile.svelte';
+  import GameScore from '@/components/GameScore.svelte';
+  import GameNavigation from '@/components/GameNavigation.svelte';
+  import { Hammer, swipe } from 'svelte-hammer';
 
-  const rowCount = 4;
-  const gridCount: Array<number> = [];
-  const refPoint: Array<string> = [];
-  let historyMove: Array<Array<Tile>> = [];
-  let historyScore: Array<number> = [];
-  let remainPoint: Array<string> = [];
-  let tiles: Array<Tile> = [];
+  const rowCount: number = 4;
+  const gridCount: number[] = [];
+  const refPoint: string[] = [];
+  let historyMove: Array<Tile[]> = [];
+  let historyScore: number[] = [];
+  let remainPoint: string[] = [];
+  let tiles: Tile[] = [];
   let score: number = 0;
   let bestScore: number = 0;
   let additionScore: number = 0;
-  let isGameOver = false;
+  let isGameOver: boolean = false;
 
   $: if (historyScore.length === 1) {
-    additionScore = historyScore[historyScore.length - 1]
+    additionScore = historyScore[historyScore.length - 1];
   } else if (historyScore.length > 1) {
-    additionScore = historyScore[historyScore.length - 1] - historyScore[historyScore.length - 2]
+    additionScore = historyScore[historyScore.length - 1] - historyScore[historyScore.length - 2];
   }
 
   $: {
-    let isPossibleMove = false
+    let isPossibleMove: boolean = false;
     const groupRight = directionTileGroup('right')
     for (const [key, tiles] of Object.entries(groupRight)) {
       isPossibleMove = isPossibleMove || possibleMove(tiles, 'right');

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Tile, Point } from '@/@types'
+  import { Tile, Point } from '@/model'
   import { appear } from '@/transition'
 
   export let tile: Tile;

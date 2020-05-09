@@ -3,9 +3,9 @@
   import { fade, fly } from 'svelte/transition';
 
   export let title: string;
-  export let score: Number;
-  export let best: Number;
-  export let addition: Number;
+  export let score: number;
+  export let best: number;
+  export let addition: number;
 
   let visible = false;
 

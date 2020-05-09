@@ -1,18 +1,18 @@
 <script lang="ts">
+  import _ from 'lodash';
   import { onMount } from 'svelte';
   import { fade } from 'svelte/transition';
-  import _ from 'lodash';
-  import { Tile, Point } from '@/@types';
-  import * as utils from '@/utils';
+  import { Hammer, swipe } from 'svelte-hammer';
+  import { Tile, Point } from '@/model';
+  import { NumberUtil, LocalStorageUtil } from '@/utils';
   import TitleCell from '@/components/twoZeroFourEight/Tile.svelte';
   import GameScore from '@/components/GameScore.svelte';
   import GameNavigation from '@/components/GameNavigation.svelte';
-  import { Hammer, swipe } from 'svelte-hammer';
 
   const rowCount: number = 4;
   const gridCount: number[] = [];
   const refPoint: string[] = [];
-  let historyMove: Array<Tile[]> = [];
+  let historyMove: Tile[][] = [];
   let historyScore: number[] = [];
   let remainPoint: string[] = [];
   let tiles: Tile[] = [];
@@ -20,6 +20,13 @@
   let bestScore: number = 0;
   let additionScore: number = 0;
   let isGameOver: boolean = false;
+
+  enum Direction {
+    TOP = 'top',
+    RIGHT = 'right',
+    BOTTOM = 'bottom',
+    LEFT = 'left',
+  }
 
   $: if (historyScore.length === 1) {
     additionScore = historyScore[historyScore.length - 1];
@@ -29,19 +36,19 @@
 
   $: {
     let isPossibleMove: boolean = false;
-    const groupRight = directionTileGroup('right')
+    const groupRight = directionTileGroup(Direction.RIGHT)
     for (const [key, tiles] of Object.entries(groupRight)) {
-      isPossibleMove = isPossibleMove || possibleMove(tiles, 'right');
+      isPossibleMove = isPossibleMove || possibleMove(tiles, Direction.RIGHT);
     }
-    const groupBottom = directionTileGroup('bottom')
+    const groupBottom = directionTileGroup(Direction.BOTTOM)
     for (const [key, tiles] of Object.entries(groupBottom)) {
-      isPossibleMove = isPossibleMove || possibleMove(tiles, 'bottom');
+      isPossibleMove = isPossibleMove || possibleMove(tiles, Direction.BOTTOM);
     }
     isGameOver = !isPossibleMove && remainPoint.length === 0
   }
 
   $: {
-    utils.storage.setStorage('2048Game', {
+    LocalStorageUtil.setStorage('2048Game', {
       results: historyMove,
       score: historyScore,
       best: bestScore
@@ -67,7 +74,7 @@
     }
     remainPoint = _.cloneDeep(refPoint)
 
-    const storage = utils.storage.getStorage('2048Game');
+    const storage = LocalStorageUtil.getStorage('2048Game');
     historyMove = storage.results
     historyScore = storage.score
     bestScore = storage.best
@@ -86,7 +93,7 @@
     }
   })();
 
-  function getCoreTileValue (target) {
+  function getCoreTileValue (target: Tile[]) {
     if (target) {
       return target.reduce((acc, cur) => {
         if (!cur.isDelete) {
@@ -103,10 +110,10 @@
     }
   }
 
-  function popRemainPoint (point: string = null): Point {
-    let index = remainPoint.indexOf(point) >= 0
+  function popRemainPoint (point: string|null = null): Point {
+    let index = point && remainPoint.indexOf(point) >= 0
       ? remainPoint.indexOf(point)
-      : utils.number.random(0, remainPoint.length - 1);
+      : NumberUtil.random(0, remainPoint.length - 1);
     const item = remainPoint.splice(index, 1).pop();
     if (item) {
       return new Point(Number(item.split(',')[0]), Number(item.split(',')[1]));
@@ -115,10 +122,17 @@
     }
   }
 
-  function getTile (prefix: any = null, fixNumber: number = null, point: string = null): Tile {
-    const remainPoint = popRemainPoint(point);
+  function getTile (
+    prefix: string|null = null,
+    fixNumber: number|null = null,
+    point: string|null = null
+  ): Tile {
+    const remainPoint: Point = popRemainPoint(point);
     if (remainPoint) {
-      return new Tile(prefix, fixNumber ? fixNumber : utils.number.ratioRandom([2, 4], [8, 2]), remainPoint);
+      const number: number = fixNumber
+        ? fixNumber
+        : NumberUtil.ratioRandom([2, 4], [8, 2]);
+      return new Tile(prefix, number, remainPoint);
     } else {
       return null;
     }
@@ -243,20 +257,20 @@
     remainPoint = ref
   }
 
-  function directionTileGroup (direction: string): Object {
-    const tileGroup: Object = ['top', 'bottom'].includes(direction)
+  function directionTileGroup (direction: Direction): Object {
+    const tileGroup: Tile[][] = ['top', 'bottom'].includes(direction)
       ? _.groupBy(tiles, 'point.x')
       : _.groupBy(tiles, 'point.y')
 
     for (const [key, tileRow] of Object.entries(tileGroup)) {
-      tileRow.sort((a, b) => {
-        if (direction === 'bottom') {
+      tileRow.sort((a: Tile, b: Tile) => {
+        if (direction === Direction.BOTTOM) {
           return b.point.y - a.point.y;
-        } else if (direction === 'top') {
+        } else if (direction === Direction.TOP) {
           return a.point.y - b.point.y;
-        } else if (direction === 'right') {
+        } else if (direction === Direction.RIGHT) {
           return b.point.x - a.point.x;
-        } else if (direction === 'left') {
+        } else {
           return a.point.x - b.point.x;
         }
       })

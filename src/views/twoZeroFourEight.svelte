@@ -150,19 +150,19 @@
     tiles = [ ...tiles, tile ];
   }
 
-  function handleKeydown ({ keyCode }): void {
+  function handleKeydown ({ keyCode }: { keyCode: number; }): void {
     if (keyCode === 37) {
-      moveTile('left');
+      moveTile(Direction.LEFT);
     } else if (keyCode === 38) {
-      moveTile('top');
+      moveTile(Direction.TOP);
     } else if (keyCode === 39) {
-      moveTile('right');
+      moveTile(Direction.RIGHT);
     } else if (keyCode === 40) {
-      moveTile('bottom');
+      moveTile(Direction.BOTTOM);
     }
   }
 
-  function moveTile (direction: string): void {
+  function moveTile (direction: Direction): void {
     refactoryTile()
 
     const cloneTiles = _.cloneDeep(tiles)
@@ -257,8 +257,8 @@
     remainPoint = ref
   }
 
-  function directionTileGroup (direction: Direction): Object {
-    const tileGroup: Tile[][] = ['top', 'bottom'].includes(direction)
+  function directionTileGroup (direction: Direction): { [x: number]: Tile[] } {
+    const tileGroup: { [x: number]: Tile[] } = [Direction.TOP, Direction.BOTTOM].includes(direction)
       ? _.groupBy(tiles, 'point.x')
       : _.groupBy(tiles, 'point.y')
 

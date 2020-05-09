@@ -3,7 +3,7 @@
 
   const dispatch = createEventDispatcher();
 
-  function prevCancel (event): void {
+  function prevCancel (): void {
     dispatch('prevCancel')
   }
 

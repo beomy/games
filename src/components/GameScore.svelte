@@ -5,7 +5,7 @@
   export let title: string;
   export let score: number;
   export let best: number;
-  export let addition: number;
+  export let addition: number = 0;
 
   let visible = false;
 

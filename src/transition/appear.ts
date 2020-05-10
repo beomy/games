@@ -10,7 +10,7 @@ export default function appear (node: Element,
       return `
         transform: scale(${t * o});
         opacity: ${t * o};
-      `
+      `;
     }
-  }
-}
+  };
+};

@@ -1,5 +1,5 @@
-import appear from './appear'
+import appear from './appear';
 
 export {
   appear,
-}
+};

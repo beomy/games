@@ -13,4 +13,4 @@ export default function appear (node: Element,
       `
     }
   }
-}
+};

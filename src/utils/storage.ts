@@ -8,4 +8,4 @@ export default class LocalStorageUtil {
   static setStorage (field: string = '2048Game', data: any) {
     localStorage.setItem(field, JSON.stringify(data));
   }
-}
+};

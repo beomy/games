@@ -18,6 +18,28 @@
   })
 </script>
 
+<div class="game-title">
+  <h1>{title}</h1>
+</div>
+<div class="score-container">
+  <div class="title">SCORE</div>
+  <div class="score">{score}</div>
+  {#if visible}
+    <div
+      in:fade={{ duration: 100 }}
+      out:fly="{{ y: -50, duration: 800 }}"
+      on:introend="{() => visible = false}"
+      class="addition"
+    >
+      +{addition}
+    </div>
+  {/if}
+</div>
+<div class="best-container">
+  <div class="title">BEST</div>
+  <div class="score">{best}</div>
+</div>
+
 <style lang="scss">
   @import "../assets/sass/variables.scss";
 
@@ -70,25 +92,3 @@
     }
   }
 </style>
-
-<div class="game-title">
-  <h1>{title}</h1>
-</div>
-<div class="score-container">
-  <div class="title">SCORE</div>
-  <div class="score">{score}</div>
-  {#if visible}
-    <div
-      in:fade={{ duration: 100 }}
-      out:fly="{{ y: -50, duration: 800 }}"
-      on:introend="{() => visible = false}"
-      class="addition"
-    >
-      +{addition}
-    </div>
-  {/if}
-</div>
-<div class="best-container">
-  <div class="title">BEST</div>
-  <div class="score">{best}</div>
-</div>

@@ -1,12 +1,25 @@
 <script lang="ts">
-  import { Tile, Point } from '@/model'
-  import { appear } from '@/transition'
+  import { Tile, Point } from '@/model';
+  import { appear } from '@/transition';
 
   export let tile: Tile;
 
   let point: Point;
   $: point = { x: tile.point.x, y: tile.point.y }
 </script>
+
+<div
+  class="tile tile-{tile.number} position-{point.x}-{point.y}"
+  class:merged="{tile.isMerged}"
+  class:delete="{tile.isDelete}"
+>
+  <div
+    in:appear="{{ delay: 100, duration: 200 }}"
+    class="tile-inner"
+  >
+    {tile.number
+  }</div>
+</div>
 
 <style lang="scss">
   @import "../../assets/sass/variables.scss";
@@ -110,16 +123,3 @@
     }
   }
 </style>
-
-<div
-  class="tile tile-{tile.number} position-{point.x}-{point.y}"
-  class:merged="{tile.isMerged}"
-  class:delete="{tile.isDelete}"
->
-  <div
-    in:appear="{{ delay: 100, duration: 200 }}"
-    class="tile-inner"
-  >
-    {tile.number
-  }</div>
-</div>

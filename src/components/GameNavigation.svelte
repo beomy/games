@@ -4,13 +4,29 @@
   const dispatch = createEventDispatcher();
 
   function prevCancel (): void {
-    dispatch('prevCancel')
+    dispatch('prevCancel');
   }
 
   function newGame (): void {
-    dispatch('newGame')
+    dispatch('newGame');
   }
 </script>
+
+<div class="navigation-buttons">
+  <div
+    class="undo"
+    on:click={prevCancel}
+  >
+    <img src="./images/undo.svg" alt="실행취소">
+  </div>
+  <button
+    type="button"
+    class="new-game"
+    on:click={newGame}
+  >
+    New Game
+  </button>
+</div>
 
 <style lang="scss">
   .navigation-buttons {
@@ -39,19 +55,3 @@
     cursor: pointer;
   }
 </style>
-
-<div class="navigation-buttons">
-  <div
-    class="undo"
-    on:click={prevCancel}
-  >
-    <img src="./images/undo.svg" alt="실행취소">
-  </div>
-  <button
-    type="button"
-    class="new-game"
-    on:click={newGame}
-  >
-    New Game
-  </button>
-</div>

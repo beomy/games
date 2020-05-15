@@ -5,6 +5,10 @@
     link: '#/2048Game',
     image: './images/2048_logo.png',
     text: '2048',
+  }, {
+    link: '#/sudoku',
+    image: './images/2048_logo.png',
+    text: '스도쿠',
   }];
 </script>
 

@@ -6,4 +6,18 @@ export default class Point {
     this.x = x;
     this.y = y;
   }
+
+  isEqual (point: Point): boolean {
+    return point.x === this.x && point.y === this.y;
+  }
+
+  toNumber (width: number): number {
+    return this.y * width + this.x;
+  }
+
+  static ToPoint (num: number, width: number): Point {
+    const x = num % width;
+    const y = Math.floor(num / width);
+    return new Point(x, y);
+  }
 };

@@ -113,7 +113,7 @@
   function popRemainPoint (point: string|null = null): Point {
     let index = point && remainPoint.indexOf(point) >= 0
       ? remainPoint.indexOf(point)
-      : NumberUtil.random(0, remainPoint.length - 1);
+      : _.random(0, remainPoint.length - 1);
     const item = remainPoint.splice(index, 1).pop();
     if (item) {
       return new Point(Number(item.split(',')[0]), Number(item.split(',')[1]));

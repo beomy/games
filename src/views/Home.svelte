@@ -7,7 +7,7 @@
     text: '2048',
   }, {
     link: '#/sudoku',
-    image: './images/2048_logo.png',
+    image: './images/sudoku_logo.png',
     text: '스도쿠',
   }];
 </script>

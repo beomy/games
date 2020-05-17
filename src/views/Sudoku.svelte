@@ -4,6 +4,10 @@
   import SudokuCell from '@/model/sudoku/Cell';
   import { ArrayUtil, MatrixUtil, NumberUtil } from '@/utils';
   import Cell from '@/components/sudoku/Cell.svelte';
+  import NumberPad from '@/components/sudoku/Numberpad.svelte';
+  import GameNavigation from '@/components/GameNavigation.svelte';
+  import { remaindHintCount } from '@/stores/navHint';
+  import { noteFlag } from '@/stores/navNote';
 
   interface IQuzyDetail {
     quiz: SudokuCell[][];
@@ -31,17 +35,42 @@
     ];
   let sudokuSolution: SudokuCell[][] = sudokuToCell(sudokuRef);
   let sudokuQuiz: SudokuCell[][] = makeSudokuQuiz(sudokuRef).quiz;
+  let currentCell: SudokuCell = new SudokuCell(0, new Point(0, 0));
+  let currentFocusPoints: Point[] = [];
+  const hintTotalCount: number = 3;
+  let confictPoints: Point[] = [];
 
-  (function init (): void {
+  $: currentFocusPoints = _.flatten(getFocusPointsList(currentCell.point));
+  $: {
+    let confictCells: SudokuCell[] = [];
+    for (const rows of sudokuQuiz) {
+      for (const item of rows) {
+        const focusPointsList: Point[][] = getFocusPointsList(item.point);
+        for (const focusPoints of focusPointsList) {
+          const cells: SudokuCell[] = pointToSudokuCell(focusPoints, sudokuQuiz);
+          const conficts = cells.filter(x => x.value !== 0 &&
+            cells.filter(y => y.value === x.value).length > 1);
+          confictCells = confictCells.concat(conficts);
+        }
+      }
+    }
+    confictPoints = confictCells.map(x => x.point);
+  }
+
+  init();
+
+  function init (): void {
     sudokuRef = makeSudoku();
     sudokuSolution = sudokuToCell(sudokuRef);
     const { quiz, emptyPoints, invalidPoints }: IQuzyDetail = makeSudokuQuiz(sudokuRef);
     if (!isVaildDifficulty(emptyPoints)) {
       setTimeout(() => init());
     } else {
+      $remaindHintCount = 3;
       sudokuQuiz = quiz;
+      currentCell = sudokuQuiz[0][0];
     }
-  })();
+  };
 
   function makeSudoku (): number[][] {
     const x1: number[][] = [ [0, 0, 1], [1, 0, 0], [0, 1, 0] ];
@@ -111,6 +140,7 @@
         quiz[point.y][point.x].value = ori;
         invalidPoints.push(point);
       } else {
+        quiz[point.y][point.x].setFreeze(false);
         emptyPoints.push(point);
       }
     }
@@ -184,30 +214,85 @@
     for (let j = 0; j < 9; j++) {
       col.push(new Point(point.x, j));
     }
-    
-    const points: Point[][] = [ squire, row, col ];
 
-    if (point.x === point.y) {
-      const row: Point[] = [];
-      for (let i = 0; i < 9; i++) {
-        row.push(new Point(i, i));
-      }
-      points.push(row);
-    }
-    if (point.x + point.y === 8) {
-      const row: Point[] = [];
-      for (let i = 0; i < 9; i++) {
-        row.push(new Point(i, 8 - i));
-      }
-      points.push(row);
-    }
-
-    return points
+    return [ squire, row, col ]
   }
 
+  function onClickCell (event) {
+    currentCell = event.detail.cell;
+  }
+
+  function onNoteFlag () {
+    $noteFlag = !$noteFlag;
+  }
+
+  function onClickPadNumber ({ detail }) {
+    const num: number = detail.number;
+    if ($noteFlag) {
+      currentCell.toggleCandidate(num);
+    } else {
+      currentCell.setValue(num);
+    }
+    sudokuQuiz = sudokuQuiz;
+  }
+
+  function onRemove () {
+    currentCell.setValue(0);
+    currentCell.setCandidateValues([]);
+    sudokuQuiz = sudokuQuiz;
+  }
+
+  function onHint () {
+    const point: Point = currentCell.point
+    currentCell.setValue(sudokuSolution[point.y][point.x].value);
+    if (!currentCell.freeze) {
+      $remaindHintCount -= 1;
+    }
+    sudokuQuiz = sudokuQuiz;
+  }
+
+  function onNewGame () {
+    init();
+  }
 </script>
 
-<div class="solution">
+<div class="game-wrapper">
+  <div class="game">
+    <table class="game-table">
+      <tbody>
+        {#each sudokuQuiz as rows, i (i)}
+          <tr class="game-row">
+            {#each rows as item, j (j)}
+              <td
+                class:selected={item.point.isEqual(currentCell.point)}
+                class:highlight-table={currentFocusPoints.find(x => x.isEqual(new Point(j, i)))}
+                class:highlight-number={item.value !== 0 && item.value === currentCell.value}
+                class:confict={confictPoints.find(x => x.isEqual(new Point(j, i)))}
+              >
+                <Cell
+                  cell={item}
+                  on:click={onClickCell}
+                />
+              </td>
+            {/each}
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="game-controls-wrapper">
+  <GameNavigation
+    list={['undo', 'remove', 'note', 'hint', 'new']}
+    on:newGame={onNewGame}
+    on:note={onNoteFlag}
+    on:remove={onRemove}
+    on:hint={onHint}
+  />
+  <NumberPad on:click={onClickPadNumber}/>
+</div>
+
+<div class="solution" style="display: inline-block; margin-left: 10px;">
   {#each sudokuSolution as rows, i (i)}
     <div>
       {#each rows as item, j (j)}
@@ -217,7 +302,7 @@
   {/each}
 </div>
 
-<div class="quiz">
+<div class="solution" style="display: inline-block; margin-left: 10px;">
   {#each sudokuQuiz as rows, i (i)}
     <div>
       {#each rows as item, j (j)}
@@ -227,28 +312,91 @@
   {/each}
 </div>
 
-
-<div class="quiz">
-  {#each sudokuQuiz as rows, i (i)}
-    <div>
-      {#each rows as item, j (j)}
-        <Cell cell={item} />
-        <!-- <span class:empty={item.value === 0}>{ item.value }</span> -->
-      {/each}
-    </div>
-  {/each}
-</div>
-
 <style lang="scss">
   .solution {
     margin-bottom: 10px;
-    .empty {
-      background-color: red;
-    }
   }
-  .quiz {
-    .empty {
-      background-color: red;
+  .game-wrapper {
+    position: relative;
+    margin-bottom: 10px;
+    &:after {
+      content: "";
+      display: block;
+      padding-bottom: 100%;
+    }
+    tbody {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      td {
+        flex-basis: 11.1111%;
+        box-sizing: border-box;
+        position: relative;
+        border-right: 1px solid #bec6d4;
+        border-bottom: 1px solid #bec6d4;
+        cursor: pointer;
+        transform: translateZ(0);
+        &.highlight-table {
+          background-color: #e2e7ed;
+        }
+        &.highlight-number {
+          background-color: #cbdbed;
+        }
+        &.confict {
+          background-color: #f7cfd6;
+        }
+        &.selected {
+          background-color: #bbdefb;
+        }
+      }
+      &:after {
+        box-sizing: border-box;
+        width: 100%;
+        display: block;
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 33.3333%;
+        height: 33.4%;
+        border-top: 2px solid #344861;
+        border-bottom: 2px solid #344861;
+        pointer-events: none;
+      }
+    }
+    .game-row {
+      display: flex;
+      height: 11.1111%;
+    }
+    .game {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+    }
+    .game-table {
+      display: block;
+      box-sizing: border-box;
+      height: 100%;
+      width: 100%;
+      border: 2px solid #344861;
+      padding: 0;
+      margin: 0;
+      &:after {
+        content: "";
+        position: absolute;
+        left: 33.3333%;
+        width: 33.3333%;
+        top: 0;
+        border-left: 2px solid #344861;
+        border-right: 2px solid #344861;
+        pointer-events: none;
+        display: block;
+        box-sizing: border-box;
+        height: 100%
+      }
     }
   }
 </style>

@@ -1,65 +1,80 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
+  import SudokuCell from '@/model/sudoku/Cell';
+  import Number from '@/components/global/Number.svelte';
+
   export let cell: SudokuCell;
+
+  const dispatch = createEventDispatcher();
+
+  function onClickCell () {
+    dispatch('click', {
+      cell,
+    });
+  }
 </script>
 
-<div class="cell">
-  <div class="value">{cell.value === 0 ? '' : cell.value}</div>
-  <div class="candidate">
-    <div class="candidate-row">
-        <div class="candidate-item" class:active={cell.candidateValues.includes(1)}>1</div>
-        <div class="candidate-item" class:active={cell.candidateValues.includes(2)}>2</div>
-        <div class="candidate-item" class:active={cell.candidateValues.includes(3)}>3</div>
+<div class="cell" on:click={onClickCell}>
+  {#if cell.value}
+    <div
+      class="value"
+      class:mutable={!cell.freeze}
+    >
+      <Number value={cell.value} />
     </div>
-    <div class="candidate-row">
-        <div class="candidate-item" class:active={cell.candidateValues.includes(4)}>4</div>
-        <div class="candidate-item" class:active={cell.candidateValues.includes(5)}>5</div>
-        <div class="candidate-item" class:active={cell.candidateValues.includes(6)}>6</div>
+  {:else if cell.candidateValues.length > 0}
+    <div class="candidate">
+      <div class="candidate-item" class:active={cell.candidateValues.includes(1)}><Number value={1} /></div>
+      <div class="candidate-item" class:active={cell.candidateValues.includes(2)}><Number value={2} /></div>
+      <div class="candidate-item" class:active={cell.candidateValues.includes(3)}><Number value={3} /></div>
+      <div class="candidate-item" class:active={cell.candidateValues.includes(4)}><Number value={4} /></div>
+      <div class="candidate-item" class:active={cell.candidateValues.includes(5)}><Number value={5} /></div>
+      <div class="candidate-item" class:active={cell.candidateValues.includes(6)}><Number value={6} /></div>
+      <div class="candidate-item" class:active={cell.candidateValues.includes(7)}><Number value={7} /></div>
+      <div class="candidate-item" class:active={cell.candidateValues.includes(8)}><Number value={8} /></div>
+      <div class="candidate-item" class:active={cell.candidateValues.includes(9)}><Number value={9} /></div>
     </div>
-    <div class="candidate-row">
-        <div class="candidate-item" class:active={cell.candidateValues.includes(7)}>7</div>
-        <div class="candidate-item" class:active={cell.candidateValues.includes(8)}>8</div>
-        <div class="candidate-item" class:active={cell.candidateValues.includes(9)}>9</div>
-    </div>
-  </div>
+  {/if}
 </div>
 
 <style lang="scss">
   .cell {
     position: relative;
-    display: inline-block;
-    width: 60px;
-    height: 60px;
-  }
-  .value {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    text-align: center;
-    font-size: 35px;
-    &:before {
-      content: '';
-      display: inline-block;
-      height: 100%;
-      vertical-align: middle;
-    }
-  }
-  .candidate {
+    width: 100%;
     height: 100%;
-  }
-  .candidate-row {
-    height: 33.3333%;
-    .candidate-item {
-      float: left;
-      width: 33.3333%;
+    .value {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
       height: 100%;
+      font-weight: 100;
+      color: #666;
       text-align: center;
-      &:before {
-        content: '';
+      font-weight: 700;
+      color: #000;
+      cursor: default;
+    }
+    .candidate {
+      position: relative;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      font-size: 0;
+      line-height: 0;
+      .candidate-item {
+        position: relative;
+        width: 33.3333%;
+        height: 33.3333%;
         display: inline-block;
-        height: 100%;
-        vertical-align: middle;
+        font-size: 10px;
+        line-height: 20px;
+        color: #aaa;
+        visibility: hidden;
+        &.active {
+          visibility: visible;
+        }
       }
     }
   }

@@ -370,7 +370,6 @@
   }
   .navigation-container {
     width: $box;
-    text-align: right;
     margin: 10px auto auto auto;
   }
   .grid-container {

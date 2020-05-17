@@ -2,7 +2,7 @@
   import _ from 'lodash';
   import Point from '@/model/Point'
   import SudokuCell from '@/model/sudoku/Cell';
-  import { ArrayUtil, MatrixUtil, NumberUtil } from '@/utils';
+  import { ArrayUtil, MatrixUtil, NumberUtil, LocalStorageUtil } from '@/utils';
   import Cell from '@/components/sudoku/Cell.svelte';
   import NumberPad from '@/components/sudoku/Numberpad.svelte';
   import GameNavigation from '@/components/GameNavigation.svelte';
@@ -35,12 +35,12 @@
     ];
   let sudokuSolution: SudokuCell[][] = sudokuToCell(sudokuRef);
   let sudokuQuiz: SudokuCell[][] = makeSudokuQuiz(sudokuRef).quiz;
-  let currentCell: SudokuCell = new SudokuCell(0, new Point(0, 0));
+  let currentCell: SudokuCell|null = null;
   let currentFocusPoints: Point[] = [];
-  const hintTotalCount: number = 3;
   let confictPoints: Point[] = [];
+  let history: any[] = [];
 
-  $: currentFocusPoints = _.flatten(getFocusPointsList(currentCell.point));
+  $: currentFocusPoints = currentCell ? _.flatten(getFocusPointsList(currentCell.point)) : [];
   $: {
     let confictCells: SudokuCell[] = [];
     for (const rows of sudokuQuiz) {
@@ -56,6 +56,12 @@
     }
     confictPoints = confictCells.map(x => x.point);
   }
+  $: {
+    LocalStorageUtil.setStorage('sudoku.results', history);
+  }
+  $: {
+    LocalStorageUtil.setStorage('sudoku.remaindHintCount', $remaindHintCount);
+  }
 
   init();
 
@@ -68,7 +74,7 @@
     } else {
       $remaindHintCount = 3;
       sudokuQuiz = quiz;
-      currentCell = sudokuQuiz[0][0];
+      history = [sudokuQuiz];
     }
   };
 
@@ -234,12 +240,14 @@
       currentCell.setValue(num);
     }
     sudokuQuiz = sudokuQuiz;
+    history = [...history, sudokuQuiz];
   }
 
   function onRemove () {
     currentCell.setValue(0);
     currentCell.setCandidateValues([]);
     sudokuQuiz = sudokuQuiz;
+    history = [...history, sudokuQuiz];
   }
 
   function onHint () {
@@ -249,6 +257,7 @@
       $remaindHintCount -= 1;
     }
     sudokuQuiz = sudokuQuiz;
+    history = [...history, sudokuQuiz];
   }
 
   function onNewGame () {
@@ -264,9 +273,9 @@
           <tr class="game-row">
             {#each rows as item, j (j)}
               <td
-                class:selected={item.point.isEqual(currentCell.point)}
+                class:selected={currentCell ? item.point.isEqual(currentCell.point) : false}
                 class:highlight-table={currentFocusPoints.find(x => x.isEqual(new Point(j, i)))}
-                class:highlight-number={item.value !== 0 && item.value === currentCell.value}
+                class:highlight-number={item.value !== 0 && currentCell && item.value === currentCell.value}
                 class:confict={confictPoints.find(x => x.isEqual(new Point(j, i)))}
               >
                 <Cell

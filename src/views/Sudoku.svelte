@@ -42,6 +42,7 @@
   let currentFocusPoints: Point[] = [];
   let confictPoints: Point[] = [];
   let history: any[] = [];
+  let isMaking: boolean = false;
 
   $: viewSudoku = $mode == 'play' ? sudokuQuiz : blinkSudokuCell;
   $: currentFocusPoints = currentCell ? _.flatten(getFocusPointsList(currentCell.point)) : [];
@@ -89,6 +90,7 @@
   })();
 
   function init (): void {
+    isMaking = true;
     $mode = 'pause';
     const sudokuRef = makeSudoku();
     const { quiz, emptyPoints, invalidPoints }: IQuzyDetail = makeSudokuQuiz(sudokuRef);
@@ -102,6 +104,7 @@
       history = [_.cloneDeep(sudokuQuiz)];
       $mode = 'play';
       $spandTime = 0;
+      isMaking = false;
     }
   };
 
@@ -322,7 +325,11 @@
   <Timer />
 </div>
 <div class="game-wrapper">
-  {#if $mode === 'pause'}
+  {#if isMaking}
+    <div class="game-dim" style="background-color: rgba(255, 255, 255, 0.8);font-size: 25px;">
+      새로운 게임을 생성중입니다.
+    </div>
+  {:else if $mode === 'pause'}
     <div class="game-dim">
       <div
         class="icon"
@@ -368,7 +375,7 @@
   <NumberPad on:click={onClickPadNumber}/>
 </div>
 
-<div class="solution" style="display: inline-block; margin-left: 10px;">
+<!--<div class="solution" style="display: inline-block; margin-left: 10px;">
   {#each sudokuSolution as rows, i (i)}
     <div>
       {#each rows as item, j (j)}
@@ -386,12 +393,9 @@
       {/each}
     </div>
   {/each}
-</div>
+</div>-->
 
 <style lang="scss">
-  .solution {
-    margin-bottom: 10px;
-  }
   .game-info-wrapper {
     text-align: right;
     margin-bottom: 5px;

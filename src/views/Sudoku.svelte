@@ -71,9 +71,10 @@
     if (ObjectUtil.IsEmpty(history)) {
       init();
     } else {
-      const solution = LocalStorageUtil.getStorage('sudoku.solution');
       $remaindHintCount = LocalStorageUtil.getStorage('sudoku.remaindHintCount');
-      sudokuQuiz = history[history.length - 1].map(x => x.map(y => SudokuCell.ToSudokuCell(y)));
+      const quize = _.cloneDeep(history[history.length - 1]);
+      const solution = LocalStorageUtil.getStorage('sudoku.solution');
+      sudokuQuiz = quize.map(x => x.map(y => SudokuCell.ToSudokuCell(y)));
       sudokuSolution = solution.map(x => x.map(y => SudokuCell.ToSudokuCell(y)));
     }
   })();
@@ -85,6 +86,7 @@
     if (!isVaildDifficulty(emptyPoints)) {
       setTimeout(() => init());
     } else {
+      currentCell = null;
       $remaindHintCount = 3;
       sudokuQuiz = quiz;
       history = [_.cloneDeep(sudokuQuiz)];
@@ -278,10 +280,13 @@
   }
 
   function onUndo () {
-    history.pop();
-    history = history;
-    sudokuQuiz = history[history.length - 1].map(x => x.map(y => SudokuCell.ToSudokuCell(y)));
-    currentCell = sudokuQuiz[currentCell.point.y][currentCell.point.x];
+    if (history.length > 1) {
+      history.pop();
+      history = history;
+      const quiz = _.cloneDeep(history[history.length - 1]);
+      sudokuQuiz = quiz.map(x => x.map(y => SudokuCell.ToSudokuCell(y)));
+      currentCell = sudokuQuiz[currentCell.point.y][currentCell.point.x];
+    }
   }
 </script>
 

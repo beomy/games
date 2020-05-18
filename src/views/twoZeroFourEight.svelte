@@ -75,9 +75,9 @@
     remainPoint = _.cloneDeep(refPoint);
 
     const storage = LocalStorageUtil.getStorage('2048Game');
-    historyMove = storage.results ? storage.results : [];
-    historyScore = storage.score ? storage.score : [];
-    bestScore = storage.best ? storage.best : 0;
+    historyMove = storage && storage.results ? storage.results : [];
+    historyScore = storage && storage.score ? storage.score : [];
+    bestScore = storage && storage.best ? storage.best : 0;
 
     if (historyMove.length > 0) {
       tiles = historyMove[historyMove.length - 1];

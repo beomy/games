@@ -8,9 +8,7 @@
   const dispatch = createEventDispatcher();
 
   function onClickCell () {
-    dispatch('click', {
-      cell,
-    });
+    dispatch('click', { cell });
   }
 </script>
 

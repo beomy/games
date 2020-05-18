@@ -23,18 +23,17 @@
     HARD = 55,
   };
 
-  const blinkSudoku: number[][] = [
-      [0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ];
-  const blinkSudokuCell = sudokuToCell(blinkSudoku);
+  const blinkSudokuCell = sudokuToCell([
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  ]);
   let selectedDifficulty: Difficulty = Difficulty.EASY;
   let sudokuSolution: SudokuCell[][] = blinkSudokuCell;
   let sudokuQuiz: SudokuCell[][] = blinkSudokuCell;
@@ -47,38 +46,25 @@
 
   $: viewSudoku = $mode == 'play' ? sudokuQuiz : blinkSudokuCell;
   $: currentFocusPoints = currentCell ? _.flatten(getFocusPointsList(currentCell.point)) : [];
-  $: {
-    let confictCells: SudokuCell[] = [];
-    for (const rows of sudokuQuiz) {
-      for (const item of rows) {
-        const focusPointsList: Point[][] = getFocusPointsList(item.point);
-        for (const focusPoints of focusPointsList) {
-          const cells: SudokuCell[] = pointToSudokuCell(focusPoints, sudokuQuiz);
-          const conficts = cells.filter(x => x.value !== 0 &&
-            cells.filter(y => y.value === x.value).length > 1);
-          confictCells = confictCells.concat(conficts);
-        }
+  $: confictPoints = sudokuQuiz.reduce((acc, rows) => {
+    const conflicts = rows.reduce((acc, item) => {
+      const focusPointsList: Point[][] = getFocusPointsList(item.point);
+      for (const focusPoints of focusPointsList) {
+        const cells: SudokuCell[] = pointToSudokuCell(focusPoints, sudokuQuiz);
+        const conficts = cells.filter(x => x.value !== 0 && cells.filter(y => y.value === x.value).length > 1);
+        acc = acc.concat(conficts);
       }
-    }
-    confictPoints = confictCells.map(x => x.point);
-  }
-  $: {
-    LocalStorageUtil.setStorage('sudoku.results', history);
-  }
-  $: {
-    LocalStorageUtil.setStorage('sudoku.remaindHintCount', $remaindHintCount);
-  }
-  $: {
-    LocalStorageUtil.setStorage('sudoku.solution', sudokuSolution);
-  }
-  $: {
-    LocalStorageUtil.setStorage('sudoku.timer', $spandTime);
-  }
+      return acc;
+    }, [])
+    return acc.concat(conflicts);
+  }, []);
+  $: LocalStorageUtil.setStorage('sudoku.results', history);
+  $: LocalStorageUtil.setStorage('sudoku.remaindHintCount', $remaindHintCount);
+  $: LocalStorageUtil.setStorage('sudoku.solution', sudokuSolution);
+  $: LocalStorageUtil.setStorage('sudoku.timer', $spandTime);
   $: isComplate = _.isEqual(cellToSudoku(sudokuSolution), cellToSudoku(sudokuQuiz));
-  $: {
-    if (isComplate) {
-      $mode = 'pause';
-    }
+  $: if (isComplate) {
+    $mode = 'pause';
   }
 
   (function () {
@@ -86,13 +72,13 @@
     if (ObjectUtil.IsEmpty(history)) {
       init();
     } else {
-      $remaindHintCount = LocalStorageUtil.getStorage('sudoku.remaindHintCount');
-      const quize = _.cloneDeep(history[history.length - 1]);
       const solution = LocalStorageUtil.getStorage('sudoku.solution');
-      sudokuQuiz = quize.map(x => x.map(y => SudokuCell.ToSudokuCell(y)));
+      const quize = _.cloneDeep(history[history.length - 1]);
       sudokuSolution = solution.map(x => x.map(y => SudokuCell.ToSudokuCell(y)));
-      $mode = 'play';
+      sudokuQuiz = quize.map(x => x.map(y => SudokuCell.ToSudokuCell(y)));
+      $remaindHintCount = LocalStorageUtil.getStorage('sudoku.remaindHintCount');
       $spandTime = LocalStorageUtil.getStorage('sudoku.timer');
+      $mode = 'play';
     }
   })();
 
@@ -105,12 +91,12 @@
       setTimeout(() => init());
     } else {
       sudokuSolution = sudokuToCell(sudokuRef);
-      currentCell = null;
-      $remaindHintCount = 3;
       sudokuQuiz = quiz;
-      history = [_.cloneDeep(sudokuQuiz)];
-      $mode = 'play';
+      $remaindHintCount = 3;
       $spandTime = 0;
+      $mode = 'play';
+      currentCell = null;
+      history = [_.cloneDeep(sudokuQuiz)];
       isMaking = false;
     }
   };
@@ -203,7 +189,7 @@
     for (const emptyPoint of emptyPoints) {
       const emptyCell = quiz[emptyPoint.y][emptyPoint.x];
       const focusPointsList: Point[][] = getFocusPointsList(emptyCell.point);
-      const candidateList: number[][] = []
+      const candidateList: number[][] = [];
       for (const focusPoints of focusPointsList) {
         const cells: SudokuCell[] = pointToSudokuCell(focusPoints, quiz);
         candidateList.push(getCandidateValues(cells));
@@ -213,10 +199,27 @@
         emptyCell.value = candidateValues[0];
         emptyCell.candidateValues = [];
         result = result && solve(quiz, emptyPoints.filter(x => !x.isEqual(emptyPoint)));
-      } else if (emptyCell.value && candidateValues.length === 0) {
+      } else if (candidateValues.length > 1) {
+        emptyCell.candidateValues = candidateValues;
+        for (const focusPoints of focusPointsList) {
+          const cells: SudokuCell[] = pointToSudokuCell(focusPoints, quiz);
+          const candidateGroup = cells.reduce((acc, cur) => {
+            if (!emptyPoint.isEqual(cur.point)) {
+              acc.push(cur.candidateValues);
+            }
+            return acc;
+          }, []);
+          const tempCandidateValues = _.without(emptyCell.candidateValues, ..._.flatten(candidateGroup));
+          if (tempCandidateValues.length === 1) {
+            emptyCell.value = tempCandidateValues[0];
+            emptyCell.candidateValues = [];
+            break;
+          }
+        }
+      }
+      if (emptyCell.value && emptyCell.candidateValues.length === 0) {
         result = true;
       } else {
-        emptyCell.candidateValues = candidateValues;
         result = false;
       }
     }
@@ -278,6 +281,10 @@
   }
 
   function onClickPadNumber ({ detail }) {
+    if ($mode === 'pause') {
+      $mode = 'play';
+      return;
+    }
     const num: number = detail.number;
     if ($noteFlag) {
       currentCell.toggleCandidate(num);

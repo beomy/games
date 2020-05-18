@@ -9,7 +9,7 @@
   import Timer from '@/components/global/Timer.svelte';
   import { remaindHintCount } from '@/stores/navHint';
   import { noteFlag } from '@/stores/navNote';
-  import { mode, spandTime } from '@/stores/timer';
+  import { mode, spandTime, timeString } from '@/stores/timer';
 
   interface IQuzyDetail {
     quiz: SudokuCell[][];
@@ -43,6 +43,7 @@
   let confictPoints: Point[] = [];
   let history: any[] = [];
   let isMaking: boolean = false;
+  let isComplate: boolean = false;
 
   $: viewSudoku = $mode == 'play' ? sudokuQuiz : blinkSudokuCell;
   $: currentFocusPoints = currentCell ? _.flatten(getFocusPointsList(currentCell.point)) : [];
@@ -72,6 +73,12 @@
   }
   $: {
     LocalStorageUtil.setStorage('sudoku.timer', $spandTime);
+  }
+  $: isComplate = _.isEqual(cellToSudoku(sudokuSolution), cellToSudoku(sudokuQuiz));
+  $: {
+    if (isComplate) {
+      $mode = 'pause';
+    }
   }
 
   (function () {
@@ -144,6 +151,10 @@
       cells.push(rows);
     }
     return cells;
+  }
+
+  function cellToSudoku (cells: SudokuCell[][]): number[][] {
+    return cells.map(x => x.map(y => y.value));
   }
 
   function isVaildDifficulty (emptyPoints: Point[]) {
@@ -326,8 +337,15 @@
 </div>
 <div class="game-wrapper">
   {#if isMaking}
-    <div class="game-dim" style="background-color: rgba(255, 255, 255, 0.8);font-size: 25px;">
+    <div class="game-dim" style="background-color: rgba(255, 255, 255, 0.8); font-size: 25px;">
       새로운 게임을 생성중입니다.
+    </div>
+  {:else if isComplate}
+    <div class="game-dim" style="background-color: rgba(255, 255, 255, 0.8);font-size: 25px;">
+      <div style="display: inline-block; line-height: 40px;">
+        훌륭합니다.<br />
+        <span style="font-size: 18px; font-weight: 600; color: #94a3b7;">{$timeString}</span>
+      </div>
     </div>
   {:else if $mode === 'pause'}
     <div class="game-dim">

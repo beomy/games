@@ -1,7 +1,9 @@
 import Home from '@/views/Home.svelte';
 import twoZeroFourEight from '@/views/twoZeroFourEight.svelte';
- 
-export const routes = {
+import Sudoku from '@/views/Sudoku.svelte';
+
+export const routes: any = {
   '/': Home,
   '/2048Game': twoZeroFourEight,
+  '/sudoku': Sudoku,
 };

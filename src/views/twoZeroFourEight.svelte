@@ -75,9 +75,9 @@
     remainPoint = _.cloneDeep(refPoint);
 
     const storage = LocalStorageUtil.getStorage('2048Game');
-    historyMove = storage.results;
-    historyScore = storage.score;
-    bestScore = storage.best;
+    historyMove = storage.results ? storage.results : [];
+    historyScore = storage.score ? storage.score : [];
+    bestScore = storage.best ? storage.best : 0;
 
     if (historyMove.length > 0) {
       tiles = historyMove[historyMove.length - 1];
@@ -113,7 +113,7 @@
   function popRemainPoint (point: string|null = null): Point {
     let index = point && remainPoint.indexOf(point) >= 0
       ? remainPoint.indexOf(point)
-      : NumberUtil.random(0, remainPoint.length - 1);
+      : _.random(0, remainPoint.length - 1);
     const item = remainPoint.splice(index, 1).pop();
     if (item) {
       return new Point(Number(item.split(',')[0]), Number(item.split(',')[1]));
@@ -278,7 +278,7 @@
     return tileGroup;
   }
 
-  function prevCancel (): void {
+  function undo (): void {
     if (historyMove.length > 1) {
       tiles = _.cloneDeep(historyMove[historyMove.length - 2]);
       score = historyScore[historyScore.length - 2];
@@ -341,7 +341,7 @@
 </div>
 <div class="navigation-container">
   <GameNavigation
-    on:prevCancel={prevCancel}
+    on:undo={undo}
     on:newGame={newGame}
   />
 </div>
@@ -370,7 +370,6 @@
   }
   .navigation-container {
     width: $box;
-    text-align: right;
     margin: 10px auto auto auto;
   }
   .grid-container {

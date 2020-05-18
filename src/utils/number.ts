@@ -1,6 +1,17 @@
+import _ from 'lodash';
+import Point from '../model/Point';
+
 export default class NumberUtil {
-  static random (min: number, max: number): number {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+  static uniqueRandom (min: number, max: number, refs: number[] = []) {
+    const numbers: number[] = [];
+    for (let i = min; i <= max; i++) {
+      if (!refs.includes(i)) {
+        numbers.push(i);
+      }
+    }
+    return numbers.length === 0
+      ? null
+      : numbers[_.random(0, numbers.length - 1)]
   }
 
   static ratioRandom (values: number[], ratios: number[]): number {
@@ -12,6 +23,6 @@ export default class NumberUtil {
         list.push(value);
       }
     }
-    return list[this.random(0, list.length - 1)];
+    return list[_.random(0, list.length - 1)];
   }
 };

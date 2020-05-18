@@ -399,10 +399,24 @@
   .game-info-wrapper {
     text-align: right;
     margin-bottom: 5px;
+    max-width: 600px;
+    min-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .game-controls-wrapper {
+    max-width: 600px;
+    min-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
   }
   .game-wrapper {
     position: relative;
     margin-bottom: 10px;
+    max-width: 600px;
+    min-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
     .game-dim {
       position: absolute;
       top: 0;

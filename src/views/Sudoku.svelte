@@ -2,7 +2,7 @@
   import _ from 'lodash';
   import Point from '@/model/Point'
   import SudokuCell from '@/model/sudoku/Cell';
-  import { ArrayUtil, MatrixUtil, NumberUtil, LocalStorageUtil } from '@/utils';
+  import { ArrayUtil, MatrixUtil, NumberUtil, LocalStorageUtil, ObjectUtil } from '@/utils';
   import Cell from '@/components/sudoku/Cell.svelte';
   import NumberPad from '@/components/sudoku/Numberpad.svelte';
   import GameNavigation from '@/components/GameNavigation.svelte';
@@ -62,8 +62,21 @@
   $: {
     LocalStorageUtil.setStorage('sudoku.remaindHintCount', $remaindHintCount);
   }
+  $: {
+    LocalStorageUtil.setStorage('sudoku.solution', sudokuSolution);
+  }
 
-  init();
+  (function () {
+    history = LocalStorageUtil.getStorage('sudoku.results');
+    if (ObjectUtil.IsEmpty(history)) {
+      init();
+    } else {
+      const solution = LocalStorageUtil.getStorage('sudoku.solution');
+      $remaindHintCount = LocalStorageUtil.getStorage('sudoku.remaindHintCount');
+      sudokuQuiz = history[history.length - 1].map(x => x.map(y => SudokuCell.ToSudokuCell(y)));
+      sudokuSolution = solution.map(x => x.map(y => SudokuCell.ToSudokuCell(y)));
+    }
+  })();
 
   function init (): void {
     sudokuRef = makeSudoku();
@@ -74,7 +87,7 @@
     } else {
       $remaindHintCount = 3;
       sudokuQuiz = quiz;
-      history = [sudokuQuiz];
+      history = [_.cloneDeep(sudokuQuiz)];
     }
   };
 
@@ -240,14 +253,14 @@
       currentCell.setValue(num);
     }
     sudokuQuiz = sudokuQuiz;
-    history = [...history, sudokuQuiz];
+    history = [...history, _.cloneDeep(sudokuQuiz)];
   }
 
   function onRemove () {
     currentCell.setValue(0);
     currentCell.setCandidateValues([]);
     sudokuQuiz = sudokuQuiz;
-    history = [...history, sudokuQuiz];
+    history = [...history, _.cloneDeep(sudokuQuiz)];
   }
 
   function onHint () {
@@ -257,11 +270,18 @@
       $remaindHintCount -= 1;
     }
     sudokuQuiz = sudokuQuiz;
-    history = [...history, sudokuQuiz];
+    history = [...history, _.cloneDeep(sudokuQuiz)];
   }
 
   function onNewGame () {
     init();
+  }
+
+  function onUndo () {
+    history.pop();
+    history = history;
+    sudokuQuiz = history[history.length - 1].map(x => x.map(y => SudokuCell.ToSudokuCell(y)));
+    currentCell = sudokuQuiz[currentCell.point.y][currentCell.point.x];
   }
 </script>
 
@@ -297,6 +317,7 @@
     on:note={onNoteFlag}
     on:remove={onRemove}
     on:hint={onHint}
+    on:undo={onUndo}
   />
   <NumberPad on:click={onClickPadNumber}/>
 </div>

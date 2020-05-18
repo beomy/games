@@ -7,8 +7,8 @@
 
   const dispatch = createEventDispatcher();
 
-  function prevCancel (): void {
-    dispatch('prevCancel');
+  function undo (): void {
+    dispatch('undo');
   }
 
   function newGame (): void {
@@ -34,7 +34,7 @@
   {#if list.includes('undo')}
     <div
       class="action-item undo"
-      on:click={prevCancel}
+      on:click={undo}
     >
       <svg class="icon-game-control" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27 27"><path fill="currentColor" fill-rule="evenodd" d="M13.021 0C9.207 0 5.589 1.715 3.125 4.609V.521a.521.521 0 0 0-1.042 0v5.208c0 .288.234.521.521.521h5.208a.522.522 0 1 0 0-1.042H3.977c2.267-2.619 5.566-4.166 9.044-4.166C19.625 1.042 25 6.416 25 13.021 25 19.626 19.625 25 13.021 25 6.416 25 1.042 19.626 1.042 13.021a.521.521 0 0 0-1.042 0c0 7.18 5.84 13.021 13.021 13.021 7.18 0 13.021-5.841 13.021-13.021C26.042 5.841 20.201 0 13.021 0"></path></svg>
       <div class="text">실행 취소</div>

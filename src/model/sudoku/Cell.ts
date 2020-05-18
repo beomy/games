@@ -9,7 +9,6 @@ export default class SudokuCell {
   constructor (value, point) {
     this.value = value;
     this.point = point;
-    this.freeze = value !== 0;
   }
 
   toggleCandidate (value: number) {
@@ -42,6 +41,9 @@ export default class SudokuCell {
   }
 
   static ToSudokuCell (obj: any): SudokuCell {
-    return new SudokuCell(obj.value, new Point(obj.point.x, obj.point.x));
+    const cell = new SudokuCell(obj.value, new Point(obj.point.x, obj.point.y));
+    cell.setFreeze(obj.freeze);
+    cell.setCandidateValues(obj.candidateValues);
+    return cell;
   }
 };

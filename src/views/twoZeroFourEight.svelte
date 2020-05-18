@@ -278,7 +278,7 @@
     return tileGroup;
   }
 
-  function prevCancel (): void {
+  function undo (): void {
     if (historyMove.length > 1) {
       tiles = _.cloneDeep(historyMove[historyMove.length - 2]);
       score = historyScore[historyScore.length - 2];
@@ -341,7 +341,7 @@
 </div>
 <div class="navigation-container">
   <GameNavigation
-    on:prevCancel={prevCancel}
+    on:undo={undo}
     on:newGame={newGame}
   />
 </div>

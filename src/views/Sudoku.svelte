@@ -6,8 +6,10 @@
   import Cell from '@/components/sudoku/Cell.svelte';
   import NumberPad from '@/components/sudoku/Numberpad.svelte';
   import GameNavigation from '@/components/GameNavigation.svelte';
+  import Timer from '@/components/global/Timer.svelte';
   import { remaindHintCount } from '@/stores/navHint';
   import { noteFlag } from '@/stores/navNote';
+  import { mode, spandTime } from '@/stores/timer';
 
   interface IQuzyDetail {
     quiz: SudokuCell[][];
@@ -21,8 +23,7 @@
     HARD = 55,
   };
 
-  let selectedDifficulty: Difficulty = Difficulty.EASY;
-  let sudokuRef: number[][] = [
+  const blinkSudoku: number[][] = [
       [0, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -33,13 +34,16 @@
       [0, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0],
     ];
-  let sudokuSolution: SudokuCell[][] = sudokuToCell(sudokuRef);
-  let sudokuQuiz: SudokuCell[][] = makeSudokuQuiz(sudokuRef).quiz;
+  const blinkSudokuCell = sudokuToCell(blinkSudoku);
+  let selectedDifficulty: Difficulty = Difficulty.EASY;
+  let sudokuSolution: SudokuCell[][] = blinkSudokuCell;
+  let sudokuQuiz: SudokuCell[][] = blinkSudokuCell;
   let currentCell: SudokuCell|null = null;
   let currentFocusPoints: Point[] = [];
   let confictPoints: Point[] = [];
   let history: any[] = [];
 
+  $: viewSudoku = $mode == 'play' ? sudokuQuiz : blinkSudokuCell;
   $: currentFocusPoints = currentCell ? _.flatten(getFocusPointsList(currentCell.point)) : [];
   $: {
     let confictCells: SudokuCell[] = [];
@@ -65,6 +69,9 @@
   $: {
     LocalStorageUtil.setStorage('sudoku.solution', sudokuSolution);
   }
+  $: {
+    LocalStorageUtil.setStorage('sudoku.timer', $spandTime);
+  }
 
   (function () {
     history = LocalStorageUtil.getStorage('sudoku.results');
@@ -76,20 +83,25 @@
       const solution = LocalStorageUtil.getStorage('sudoku.solution');
       sudokuQuiz = quize.map(x => x.map(y => SudokuCell.ToSudokuCell(y)));
       sudokuSolution = solution.map(x => x.map(y => SudokuCell.ToSudokuCell(y)));
+      $mode = 'play';
+      $spandTime = LocalStorageUtil.getStorage('sudoku.timer');
     }
   })();
 
   function init (): void {
-    sudokuRef = makeSudoku();
-    sudokuSolution = sudokuToCell(sudokuRef);
+    $mode = 'pause';
+    const sudokuRef = makeSudoku();
     const { quiz, emptyPoints, invalidPoints }: IQuzyDetail = makeSudokuQuiz(sudokuRef);
     if (!isVaildDifficulty(emptyPoints)) {
       setTimeout(() => init());
     } else {
+      sudokuSolution = sudokuToCell(sudokuRef);
       currentCell = null;
       $remaindHintCount = 3;
       sudokuQuiz = quiz;
       history = [_.cloneDeep(sudokuQuiz)];
+      $mode = 'play';
+      $spandTime = 0;
     }
   };
 
@@ -244,6 +256,10 @@
   }
 
   function onNoteFlag () {
+    if ($mode === 'pause') {
+      $mode = 'play';
+      return;
+    }
     $noteFlag = !$noteFlag;
   }
 
@@ -259,6 +275,10 @@
   }
 
   function onRemove () {
+    if ($mode === 'pause') {
+      $mode = 'play';
+      return;
+    }
     currentCell.setValue(0);
     currentCell.setCandidateValues([]);
     sudokuQuiz = sudokuQuiz;
@@ -266,6 +286,10 @@
   }
 
   function onHint () {
+    if ($mode === 'pause') {
+      $mode = 'play';
+      return;
+    }
     const point: Point = currentCell.point
     currentCell.setValue(sudokuSolution[point.y][point.x].value);
     if (!currentCell.freeze) {
@@ -280,6 +304,10 @@
   }
 
   function onUndo () {
+    if ($mode === 'pause') {
+      $mode = 'play';
+      return;
+    }
     if (history.length > 1) {
       history.pop();
       history = history;
@@ -290,11 +318,24 @@
   }
 </script>
 
+<div class="game-info-wrapper">
+  <Timer />
+</div>
 <div class="game-wrapper">
+  {#if $mode === 'pause'}
+    <div class="game-dim">
+      <div
+        class="icon"
+        on:click={() => $mode = 'play'}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" id="icon-play-big"><g fill="none" fill-rule="evenodd"><circle cx="30" cy="30" r="30" fill="#4A90E2"/><path fill="#FFF" d="M39.123 31.978L26.56 40.615a2.4 2.4 0 0 1-3.76-1.977V21.362a2.4 2.4 0 0 1 3.76-1.977l12.563 8.637a2.4 2.4 0 0 1 0 3.956z"/></g></svg>
+      </div>
+    </div>
+  {/if}
   <div class="game">
     <table class="game-table">
       <tbody>
-        {#each sudokuQuiz as rows, i (i)}
+        {#each viewSudoku as rows, i (i)}
           <tr class="game-row">
             {#each rows as item, j (j)}
               <td
@@ -351,9 +392,33 @@
   .solution {
     margin-bottom: 10px;
   }
+  .game-info-wrapper {
+    text-align: right;
+    margin-bottom: 5px;
+  }
   .game-wrapper {
     position: relative;
     margin-bottom: 10px;
+    .game-dim {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      text-align: center;
+      z-index: 1;
+      &:before {
+        content: '';
+        height: 100%;
+        display: inline-block;
+        vertical-align: middle;
+      }
+      .icon {
+        vertical-align: middle;
+        display: inline-block;
+        cursor: pointer;
+      }
+    }
     &:after {
       content: "";
       display: block;

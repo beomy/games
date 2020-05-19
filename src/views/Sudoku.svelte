@@ -48,9 +48,8 @@
   $: currentFocusPoints = currentCell ? _.flatten(getFocusPointsList(currentCell.point)) : [];
   $: confictPoints = sudokuQuiz.reduce((acc, rows) => {
     const conflicts = rows.reduce((acc, item) => {
-      const focusPointsList: Point[][] = getFocusPointsList(item.point);
-      for (const focusPoints of focusPointsList) {
-        const cells: SudokuCell[] = pointToSudokuCell(focusPoints, sudokuQuiz);
+      const focusCellsList: SudokuCell[][] = getFocusCellsList(item.point);
+      for (const cells of focusCellsList) {
         const conficts: SudokuCell[] = cells.filter(x => x.value !== 0 && cells.filter(y => y.value === x.value).length > 1);
         acc = acc.concat(conficts.map(x => x.point));
       }
@@ -187,12 +186,10 @@
   function solve (quiz: SudokuCell[][], emptyPoints: Point[]): boolean {
     let result = true;
     for (const emptyPoint of emptyPoints) {
-      const emptyCell = quiz[emptyPoint.y][emptyPoint.x];
-      const focusPointsList: Point[][] = getFocusPointsList(emptyCell.point);
       const candidateList: number[][] = [];
       const candidateGroupList: number[][] = [];
-      for (const focusPoints of focusPointsList) {
-        const cells: SudokuCell[] = pointToSudokuCell(focusPoints, quiz);
+      const focusCellsList: SudokuCell[][] = getFocusCellsList(emptyPoint, quiz);
+      for (const cells of focusCellsList) {
         candidateList.push(getCandidateValues(cells));
         candidateGroupList.push(cells.reduce((acc, cur) => {
           if (!emptyPoint.isEqual(cur.point)) {
@@ -201,6 +198,7 @@
           return acc;
         }, []));
       }
+      const emptyCell = quiz[emptyPoint.y][emptyPoint.x];
       const candidateValues = _.intersection(...candidateList);
       if (candidateValues.length === 1) {
         emptyCell.value = candidateValues[0];
@@ -249,23 +247,49 @@
     const endX = (Math.floor(point.x / 3) + 1) * 3 - 1;
     const startY = Math.floor(point.y / 3) * 3;
     const endY = (Math.floor(point.y / 3) + 1) * 3 - 1;
-
     const squire: Point[] = [];
     for (let i = startX; i <= endX; i++) {
       for (let j = startY; j <= endY; j++) {
         squire.push(new Point(i, j));
       }
     }
+
     const row: Point[] = [];
     for (let i = 0; i < 9; i++) {
       row.push(new Point(i, point.y));
     }
+
     const col: Point[] = [];
     for (let j = 0; j < 9; j++) {
       col.push(new Point(point.x, j));
     }
 
-    return [ squire, row, col ]
+    return [ squire, row, col ];
+  }
+
+  function getFocusCellsList (point: Point, sudoku: SudokuCell[][] = sudokuQuiz): SudokuCell[][] {
+    const startX = Math.floor(point.x / 3) * 3;
+    const endX = (Math.floor(point.x / 3) + 1) * 3 - 1;
+    const startY = Math.floor(point.y / 3) * 3;
+    const endY = (Math.floor(point.y / 3) + 1) * 3 - 1;
+    const squire: SudokuCell[] = [];
+    for (let x = startX; x <= endX; x++) {
+      for (let y = startY; y <= endY; y++) {
+        squire.push(sudoku[y][x]);
+      }
+    }
+
+    const row: SudokuCell[] = [];
+    for (let j = 0; j < 9; j++) {
+      row.push(sudoku[point.y][j]);
+    }
+
+    const col: SudokuCell[] = [];
+    for (let i = 0; i < 9; i++) {
+      col.push(sudoku[i][point.x]);
+    }
+
+    return [ squire, row, col ];
   }
 
   function onClickCell (event) {
@@ -410,9 +434,9 @@
       {/each}
     </div>
   {/each}
-</div>
+</div>-->
 
-<div class="solution" style="display: inline-block; margin-left: 10px;">
+<!--<div class="solution" style="display: inline-block; margin-left: 10px;">
   {#each sudokuQuiz as rows, i (i)}
     <div>
       {#each rows as item, j (j)}

@@ -51,8 +51,8 @@
       const focusPointsList: Point[][] = getFocusPointsList(item.point);
       for (const focusPoints of focusPointsList) {
         const cells: SudokuCell[] = pointToSudokuCell(focusPoints, sudokuQuiz);
-        const conficts = cells.filter(x => x.value !== 0 && cells.filter(y => y.value === x.value).length > 1);
-        acc = acc.concat(conficts);
+        const conficts: SudokuCell[] = cells.filter(x => x.value !== 0 && cells.filter(y => y.value === x.value).length > 1);
+        acc = acc.concat(conficts.map(x => x.point));
       }
       return acc;
     }, [])
@@ -70,7 +70,9 @@
   (function () {
     history = LocalStorageUtil.getStorage('sudoku.results');
     if (ObjectUtil.IsEmpty(history)) {
-      init();
+      isMaking = true;
+      $mode = 'pause';
+      setTimeout(() => init());
     } else {
       const solution = LocalStorageUtil.getStorage('sudoku.solution');
       const quize = _.cloneDeep(history[history.length - 1]);
@@ -83,8 +85,6 @@
   })();
 
   function init (): void {
-    isMaking = true;
-    $mode = 'pause';
     const sudokuRef = makeSudoku();
     const { quiz, emptyPoints, invalidPoints }: IQuzyDetail = makeSudokuQuiz(sudokuRef);
     if (!isVaildDifficulty(emptyPoints)) {
@@ -190,9 +190,16 @@
       const emptyCell = quiz[emptyPoint.y][emptyPoint.x];
       const focusPointsList: Point[][] = getFocusPointsList(emptyCell.point);
       const candidateList: number[][] = [];
+      const candidateGroupList: number[][] = [];
       for (const focusPoints of focusPointsList) {
         const cells: SudokuCell[] = pointToSudokuCell(focusPoints, quiz);
         candidateList.push(getCandidateValues(cells));
+        candidateGroupList.push(cells.reduce((acc, cur) => {
+          if (!emptyPoint.isEqual(cur.point)) {
+            acc = acc.concat(cur.candidateValues);
+          }
+          return acc;
+        }, []));
       }
       const candidateValues = _.intersection(...candidateList);
       if (candidateValues.length === 1) {
@@ -201,15 +208,8 @@
         result = result && solve(quiz, emptyPoints.filter(x => !x.isEqual(emptyPoint)));
       } else if (candidateValues.length > 1) {
         emptyCell.candidateValues = candidateValues;
-        for (const focusPoints of focusPointsList) {
-          const cells: SudokuCell[] = pointToSudokuCell(focusPoints, quiz);
-          const candidateGroup = cells.reduce((acc, cur) => {
-            if (!emptyPoint.isEqual(cur.point)) {
-              acc.push(cur.candidateValues);
-            }
-            return acc;
-          }, []);
-          const tempCandidateValues = _.without(emptyCell.candidateValues, ..._.flatten(candidateGroup));
+        for (const candidateGroup of candidateGroupList) {
+          const tempCandidateValues = _.without(emptyCell.candidateValues, ...candidateGroup);
           if (tempCandidateValues.length === 1) {
             emptyCell.value = tempCandidateValues[0];
             emptyCell.candidateValues = [];
@@ -321,7 +321,9 @@
   }
 
   function onNewGame () {
-    init();
+    isMaking = true;
+    $mode = 'pause';
+    setTimeout(() => init());
   }
 
   function onUndo () {

@@ -30,6 +30,13 @@ export default class SudokuCell {
     }
   }
 
+  removeCandidateValue (value: number) {
+    const index = this.candidateValues.indexOf(value);
+    if (index >= 0) {
+      this.candidateValues.splice(index, 1);
+    }
+  }
+
   setFreeze (value: boolean) {
     this.freeze = value;
   }

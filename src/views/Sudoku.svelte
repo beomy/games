@@ -314,6 +314,9 @@
       currentCell.toggleCandidate(num);
     } else {
       currentCell.setValue(num);
+      for (const cell of _.flatten(getFocusCellsList(currentCell.point))) {
+        cell.removeCandidateValue(num);
+      }
     }
     sudokuQuiz = sudokuQuiz;
     history = [...history, _.cloneDeep(sudokuQuiz)];

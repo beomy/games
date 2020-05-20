@@ -25,8 +25,16 @@ export default class SudokuCell {
   }
 
   setCandidateValues (value: number[]) {
-    if (!this.freeze) {
-      this.candidateValues = value;
+    if (this.freeze) {
+      return;
+    }
+    this.candidateValues = value;
+  }
+
+  removeCandidateValue (value: number) {
+    const index = this.candidateValues.indexOf(value);
+    if (index >= 0) {
+      this.candidateValues.splice(index, 1);
     }
   }
 
@@ -35,9 +43,10 @@ export default class SudokuCell {
   }
 
   setValue (value: number) {
-    if (!this.freeze) {
-      this.value = value;
+    if (this.freeze) {
+      return;
     }
+    this.value = value;
   }
 
   static ToSudokuCell (obj: any): SudokuCell {

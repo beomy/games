@@ -3,7 +3,7 @@ export default class LocalStorageUtil {
     const rawStorage: string|null = localStorage.getItem(field);
     return rawStorage
       ? JSON.parse(rawStorage)
-      : {};
+      : null;
   }
   static setStorage (field: string, data: any) {
     localStorage.setItem(field, JSON.stringify(data));

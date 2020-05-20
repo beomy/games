@@ -23,6 +23,7 @@
     HARD = 55,
   };
 
+  const difficultyList = ObjectUtil.EnumToArray(Difficulty);
   const blinkSudokuCell = sudokuToCell([
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -34,9 +35,10 @@
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
   ]);
-  let selectedDifficulty: Difficulty = Difficulty.EASY;
+  let selectedDifficulty: Difficulty = LocalStorageUtil.getStorage('sudoku.difficulty') || Difficulty.EASY;
   let sudokuSolution: SudokuCell[][] = blinkSudokuCell;
   let sudokuQuiz: SudokuCell[][] = blinkSudokuCell;
+  let viewSudoku: SudokuCell[][] = blinkSudokuCell;
   let currentCell: SudokuCell|null = null;
   let currentFocusPoints: Point[] = [];
   let confictPoints: Point[] = [];
@@ -64,6 +66,10 @@
   $: isComplate = _.isEqual(cellToSudoku(sudokuSolution), cellToSudoku(sudokuQuiz));
   $: if (isComplate) {
     $mode = 'pause';
+  }
+  $: if (selectedDifficulty !== LocalStorageUtil.getStorage('sudoku.difficulty')) {
+    LocalStorageUtil.setStorage('sudoku.difficulty', selectedDifficulty);
+    onNewGame();
   }
 
   (function () {
@@ -292,6 +298,16 @@
     return [ squire, row, col ];
   }
 
+  function getDifficultyName(str: string): string {
+    if (str === 'EASY') {
+      return '쉬움'
+    } else if (str === 'NORMAL') {
+      return '보통'
+    } else if (str === 'HARD') {
+      return '어려움'
+    }
+  }
+
   function onClickCell (event) {
     currentCell = event.detail.cell;
   }
@@ -310,6 +326,9 @@
       return;
     }
     const num: number = detail.number;
+    if (currentCell.freeze) {
+      return
+    }
     if ($noteFlag) {
       currentCell.toggleCandidate(num);
     } else {
@@ -369,7 +388,16 @@
 </script>
 
 <div class="game-info-wrapper">
-  <Timer />
+  <div class="difficulty-wrapper">
+    <select bind:value={selectedDifficulty}>
+      {#each difficultyList as difficulty (difficulty.id)}
+        <option value={difficulty.id}>{getDifficultyName(difficulty.value)}</option>
+      {/each}
+    </select>
+  </div>
+  <div class="timer-wrapper">
+    <Timer />
+  </div>
 </div>
 <div class="game-wrapper">
   {#if isMaking}
@@ -451,12 +479,32 @@
 
 <style lang="scss">
   .game-info-wrapper {
-    text-align: right;
     margin-bottom: 5px;
     max-width: 600px;
     min-width: 300px;
     margin-left: auto;
     margin-right: auto;
+    overflow: hidden;
+    .difficulty-wrapper {
+      float: left;
+      select {
+        width: 100px;
+        font-weight: 600;
+        color: #94a3b7;
+        -moz-appearance:none; /* Firefox */
+        -webkit-appearance:none; /* Safari and Chrome */
+        appearance:none;
+        padding: 3px 10px;
+        border-radius: 5px;
+        background: url(/images/arrow.svg) no-repeat;
+        background-position-x: calc(100% - 10px);
+        background-position-y: 10px;
+      }
+    }
+    .timer-wrapper {
+      display: inline-block;
+      float: right;
+    }
   }
   .game-controls-wrapper {
     max-width: 600px;

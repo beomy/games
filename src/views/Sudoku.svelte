@@ -173,7 +173,7 @@
       const point: Point = Point.ToPoint(rand, 9);
       const ori = quiz[point.y][point.x].value;
       quiz[point.y][point.x].value = 0;
-      const result = solve(_.cloneDeep(quiz), [ point, ...emptyPoints ]);
+      const result = _solve(_.cloneDeep(quiz), [ point, ...emptyPoints ]);
       if (!result) {
         quiz[point.y][point.x].value = ori;
         invalidPoints.push(point);
@@ -187,6 +187,73 @@
       emptyPoints,
       invalidPoints,
     };
+  }
+
+  function setCandinateValues (quiz: SudokuCell[][], emptyPoints: Point[]): boolean {
+    let result = true;
+    for (let i = 0; i < emptyPoints.length; i++) {
+      const emptyPoint = emptyPoints[i];
+      const emptyCell = quiz[emptyPoint.y][emptyPoint.x];
+      const candidateList: number[][] = [];
+      const focusCellsList: SudokuCell[][] = getFocusCellsList(emptyPoint, quiz);
+      for (const cells of focusCellsList) {
+        candidateList.push(getCandidateValues(cells));
+      }
+      const candidateValues = _.intersection(...candidateList);
+      if (candidateValues.length === 1) {
+        i = 0;
+        emptyCell.value = candidateValues[0];
+        emptyCell.candidateValues = [];
+        result = result && true;
+      } else if (candidateValues.length > 1) {
+        emptyCell.candidateValues = candidateValues;
+        result = false;
+      } else {
+        result = result && true;
+      }
+    }
+    return result;
+  }
+
+  function diffCandinateValues (quiz: SudokuCell[][], emptyPoints: Point[]): boolean {
+    let result = true;
+    for (let i = 0; i < emptyPoints.length; i++) {
+      const emptyPoint = emptyPoints[i];
+      const emptyCell = quiz[emptyPoint.y][emptyPoint.x];
+      const focusCellsList: SudokuCell[][] = getFocusCellsList(emptyPoint, quiz);
+      let find = false;
+      for (const cells of focusCellsList) {
+        const candidateGroup = cells.reduce((acc, cur) => {
+          if (!emptyPoint.isEqual(cur.point)) {
+            acc = acc.concat(cur.candidateValues);
+          }
+          return acc;
+        }, [])
+        const tempCandidateValues = _.without(emptyCell.candidateValues, ...candidateGroup);
+        if (tempCandidateValues.length === 1) {
+          i = 0;
+          emptyCell.value = tempCandidateValues[0];
+          emptyCell.candidateValues = [];
+          find = true;
+          break;
+        }
+      }
+      result = result && find;
+    }
+    return result;
+  }
+
+  function _solve (quiz: SudokuCell[][], emptyPoints: Point[]): boolean {
+    let result = setCandinateValues(quiz, emptyPoints);
+    if (!result) {
+      result = diffCandinateValues(quiz, emptyPoints.reduce((acc, cur) => {
+        if (!quiz[cur.y][cur.x].value) {
+          acc.push(cur);
+        }
+        return acc;
+      }, []));
+    }
+    return result;
   }
 
   function solve (quiz: SudokuCell[][], emptyPoints: Point[]): boolean {
@@ -388,13 +455,13 @@
 </script>
 
 <div class="game-info-wrapper">
-  <div class="difficulty-wrapper">
+  <!--<div class="difficulty-wrapper">
     <select bind:value={selectedDifficulty}>
       {#each difficultyList as difficulty (difficulty.id)}
         <option value={difficulty.id}>{getDifficultyName(difficulty.value)}</option>
       {/each}
     </select>
-  </div>
+  </div>-->
   <div class="timer-wrapper">
     <Timer />
   </div>
@@ -485,22 +552,22 @@
     margin-left: auto;
     margin-right: auto;
     overflow: hidden;
-    .difficulty-wrapper {
-      float: left;
-      select {
-        width: 100px;
-        font-weight: 600;
-        color: #94a3b7;
-        -moz-appearance:none; /* Firefox */
-        -webkit-appearance:none; /* Safari and Chrome */
-        appearance:none;
-        padding: 3px 10px;
-        border-radius: 5px;
-        background: url(./images/arrow.svg) no-repeat;
-        background-position-x: calc(100% - 10px);
-        background-position-y: 10px;
-      }
-    }
+    // .difficulty-wrapper {
+    //   float: left;
+    //   select {
+    //     width: 100px;
+    //     font-weight: 600;
+    //     color: #94a3b7;
+    //     -moz-appearance:none; /* Firefox */
+    //     -webkit-appearance:none; /* Safari and Chrome */
+    //     appearance:none;
+    //     padding: 3px 10px;
+    //     border-radius: 5px;
+    //     background: url(./images/arrow.svg) no-repeat;
+    //     background-position-x: calc(100% - 10px);
+    //     background-position-y: 10px;
+    //   }
+    // }
     .timer-wrapper {
       display: inline-block;
       float: right;

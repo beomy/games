@@ -3,7 +3,7 @@
   import { spandTime, timeString, mode } from '@/stores/timer';
 
   const dispatch = createEventDispatcher();
-  let timerId: number|null = null;
+  let timerId: any;
 
   $: {
     if ($mode === 'play') {
@@ -17,14 +17,16 @@
     pause();
   })
 
-  function play {
+  function play () {
     timerId = setInterval(() => {
       $spandTime++;
     }, 1000)
   }
 
-  function pause {
-    clearInterval(timerId);
+  function pause () {
+    if (timerId) {
+      clearInterval(timerId);
+    }
   }
 
   function onClickIcon () {

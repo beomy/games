@@ -367,11 +367,13 @@
 
   function getDifficultyName(str: string): string {
     if (str === 'EASY') {
-      return '쉬움'
+      return '쉬움';
     } else if (str === 'NORMAL') {
-      return '보통'
+      return '보통';
     } else if (str === 'HARD') {
-      return '어려움'
+      return '어려움';
+    } else {
+      return '';
     }
   }
 

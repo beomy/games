@@ -23,6 +23,7 @@
     HARD = 55,
   };
 
+  const isProd = process.env.NODE_ENV === 'production';
   const difficultyList = ObjectUtil.EnumToArray(Difficulty);
   const blinkSudokuCell = sudokuToCell([
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -173,7 +174,7 @@
       const point: Point = Point.ToPoint(rand, 9);
       const ori = quiz[point.y][point.x].value;
       quiz[point.y][point.x].value = 0;
-      const result = _solve(_.cloneDeep(quiz), [ point, ...emptyPoints ]);
+      const result = solve(_.cloneDeep(quiz), [ point, ...emptyPoints ]);
       if (!result) {
         quiz[point.y][point.x].value = ori;
         invalidPoints.push(point);
@@ -191,8 +192,7 @@
 
   function setCandinateValues (quiz: SudokuCell[][], emptyPoints: Point[]): boolean {
     let result = true;
-    for (let i = 0; i < emptyPoints.length; i++) {
-      const emptyPoint = emptyPoints[i];
+    for (const emptyPoint of emptyPoints) {
       const emptyCell = quiz[emptyPoint.y][emptyPoint.x];
       const candidateList: number[][] = [];
       const focusCellsList: SudokuCell[][] = getFocusCellsList(emptyPoint, quiz);
@@ -201,10 +201,8 @@
       }
       const candidateValues = _.intersection(...candidateList);
       if (candidateValues.length === 1) {
-        i = 0;
-        emptyCell.value = candidateValues[0];
-        emptyCell.candidateValues = [];
-        result = result && true;
+        setSudokuNumber(emptyCell.point, candidateValues[0], quiz);
+        return setCandinateValues(quiz, emptyPoints.filter(x => !x.isEqual(emptyPoint)));
       } else if (candidateValues.length > 1) {
         emptyCell.candidateValues = candidateValues;
         result = false;
@@ -217,11 +215,9 @@
 
   function diffCandinateValues (quiz: SudokuCell[][], emptyPoints: Point[]): boolean {
     let result = true;
-    for (let i = 0; i < emptyPoints.length; i++) {
-      const emptyPoint = emptyPoints[i];
+    for (const emptyPoint of emptyPoints) {
       const emptyCell = quiz[emptyPoint.y][emptyPoint.x];
       const focusCellsList: SudokuCell[][] = getFocusCellsList(emptyPoint, quiz);
-      let find = false;
       for (const cells of focusCellsList) {
         const candidateGroup = cells.reduce((acc, cur) => {
           if (!emptyPoint.isEqual(cur.point)) {
@@ -231,19 +227,17 @@
         }, [])
         const tempCandidateValues = _.without(emptyCell.candidateValues, ...candidateGroup);
         if (tempCandidateValues.length === 1) {
-          i = 0;
-          emptyCell.value = tempCandidateValues[0];
-          emptyCell.candidateValues = [];
-          find = true;
-          break;
+          setSudokuNumber(emptyCell.point, tempCandidateValues[0], quiz);
+          return diffCandinateValues(quiz, emptyPoints.filter(x => !x.isEqual(emptyPoint)));
+        } else {
+          result = false;
         }
       }
-      result = result && find;
     }
     return result;
   }
 
-  function _solve (quiz: SudokuCell[][], emptyPoints: Point[]): boolean {
+  function solve (quiz: SudokuCell[][], emptyPoints: Point[]): boolean {
     let result = setCandinateValues(quiz, emptyPoints);
     if (!result) {
       result = diffCandinateValues(quiz, emptyPoints.reduce((acc, cur) => {
@@ -252,47 +246,6 @@
         }
         return acc;
       }, []));
-    }
-    return result;
-  }
-
-  function solve (quiz: SudokuCell[][], emptyPoints: Point[]): boolean {
-    let result = true;
-    for (const emptyPoint of emptyPoints) {
-      const candidateList: number[][] = [];
-      const candidateGroupList: number[][] = [];
-      const focusCellsList: SudokuCell[][] = getFocusCellsList(emptyPoint, quiz);
-      for (const cells of focusCellsList) {
-        candidateList.push(getCandidateValues(cells));
-        candidateGroupList.push(cells.reduce((acc, cur) => {
-          if (!emptyPoint.isEqual(cur.point)) {
-            acc = acc.concat(cur.candidateValues);
-          }
-          return acc;
-        }, []));
-      }
-      const emptyCell = quiz[emptyPoint.y][emptyPoint.x];
-      const candidateValues = _.intersection(...candidateList);
-      if (candidateValues.length === 1) {
-        emptyCell.value = candidateValues[0];
-        emptyCell.candidateValues = [];
-        result = result && solve(quiz, emptyPoints.filter(x => !x.isEqual(emptyPoint)));
-      } else if (candidateValues.length > 1) {
-        emptyCell.candidateValues = candidateValues;
-        for (const candidateGroup of candidateGroupList) {
-          const tempCandidateValues = _.without(emptyCell.candidateValues, ...candidateGroup);
-          if (tempCandidateValues.length === 1) {
-            emptyCell.value = tempCandidateValues[0];
-            emptyCell.candidateValues = [];
-            break;
-          }
-        }
-      }
-      if (emptyCell.value && emptyCell.candidateValues.length === 0) {
-        result = true;
-      } else {
-        result = false;
-      }
     }
     return result;
   }
@@ -377,6 +330,15 @@
     }
   }
 
+  function setSudokuNumber (point: Point, num: number, quiz: SudokuCell[][] = sudokuQuiz) {
+    const cell = quiz[point.y][point.x];
+    cell.setValue(num);
+    cell.setCandidateValues([]);
+    for (const focusCell of _.flatten(getFocusCellsList(point, quiz))) {
+      focusCell.removeCandidateValue(num);
+    }
+  }
+
   function onClickCell (event) {
     currentCell = event.detail.cell;
   }
@@ -394,17 +356,14 @@
       $mode = 'play';
       return;
     }
-    const num: number = detail.number;
     if (currentCell.freeze) {
       return
     }
+    const num: number = detail.number;
     if ($noteFlag) {
       currentCell.toggleCandidate(num);
     } else {
-      currentCell.setValue(num);
-      for (const cell of _.flatten(getFocusCellsList(currentCell.point))) {
-        cell.removeCandidateValue(num);
-      }
+      setSudokuNumber(currentCell.point, num);
     }
     sudokuQuiz = sudokuQuiz;
     history = [...history, _.cloneDeep(sudokuQuiz)];
@@ -454,16 +413,30 @@
       currentCell = sudokuQuiz[currentCell.point.y][currentCell.point.x];
     }
   }
+
+  function testSetCandinateValues () {
+    setCandinateValues(sudokuQuiz, _.flatten(sudokuQuiz).filter(x => !x.value).map(x => x.point));
+    sudokuQuiz = sudokuQuiz;
+  }
+  function testDiffCandinateValues () {
+    diffCandinateValues(sudokuQuiz, _.flatten(sudokuQuiz).filter(x => !x.value).map(x => x.point));
+    sudokuQuiz = sudokuQuiz;
+  }
 </script>
 
+{#if !isProd}
+  <button on:click={testSetCandinateValues}>setCandinateValues</button>
+  <button on:click={testDiffCandinateValues}>diffCandinateValues</button>
+{/if}
+
 <div class="game-info-wrapper">
-  <!--<div class="difficulty-wrapper">
+  <div class="difficulty-wrapper">
     <select bind:value={selectedDifficulty}>
       {#each difficultyList as difficulty (difficulty.id)}
         <option value={difficulty.id}>{getDifficultyName(difficulty.value)}</option>
       {/each}
     </select>
-  </div>-->
+  </div>
   <div class="timer-wrapper">
     <Timer />
   </div>
@@ -554,22 +527,22 @@
     margin-left: auto;
     margin-right: auto;
     overflow: hidden;
-    // .difficulty-wrapper {
-    //   float: left;
-    //   select {
-    //     width: 100px;
-    //     font-weight: 600;
-    //     color: #94a3b7;
-    //     -moz-appearance:none; /* Firefox */
-    //     -webkit-appearance:none; /* Safari and Chrome */
-    //     appearance:none;
-    //     padding: 3px 10px;
-    //     border-radius: 5px;
-    //     background: url(./images/arrow.svg) no-repeat;
-    //     background-position-x: calc(100% - 10px);
-    //     background-position-y: 10px;
-    //   }
-    // }
+    .difficulty-wrapper {
+      float: left;
+      select {
+        width: 100px;
+        font-weight: 600;
+        color: #94a3b7;
+        -moz-appearance:none; /* Firefox */
+        -webkit-appearance:none; /* Safari and Chrome */
+        appearance:none;
+        padding: 3px 10px;
+        border-radius: 5px;
+        background: url(./images/arrow.svg) no-repeat;
+        background-position-x: calc(100% - 10px);
+        background-position-y: 10px;
+      }
+    }
     .timer-wrapper {
       display: inline-block;
       float: right;

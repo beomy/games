@@ -23,6 +23,7 @@
     HARD = 55,
   };
 
+  const isProd = process.env.NODE_ENV === 'production';
   const difficultyList = ObjectUtil.EnumToArray(Difficulty);
   const blinkSudokuCell = sudokuToCell([
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -189,43 +190,62 @@
     };
   }
 
-  function solve (quiz: SudokuCell[][], emptyPoints: Point[]): boolean {
+  function setCandinateValues (quiz: SudokuCell[][], emptyPoints: Point[]): boolean {
     let result = true;
     for (const emptyPoint of emptyPoints) {
+      const emptyCell = quiz[emptyPoint.y][emptyPoint.x];
       const candidateList: number[][] = [];
-      const candidateGroupList: number[][] = [];
       const focusCellsList: SudokuCell[][] = getFocusCellsList(emptyPoint, quiz);
       for (const cells of focusCellsList) {
         candidateList.push(getCandidateValues(cells));
-        candidateGroupList.push(cells.reduce((acc, cur) => {
+      }
+      const candidateValues = _.intersection(...candidateList);
+      if (candidateValues.length === 1) {
+        setSudokuNumber(emptyCell.point, candidateValues[0], quiz);
+        return setCandinateValues(quiz, emptyPoints.filter(x => !x.isEqual(emptyPoint)));
+      } else if (candidateValues.length > 1) {
+        emptyCell.candidateValues = candidateValues;
+        result = false;
+      } else {
+        result = result && true;
+      }
+    }
+    return result;
+  }
+
+  function diffCandinateValues (quiz: SudokuCell[][], emptyPoints: Point[]): boolean {
+    let result = true;
+    for (const emptyPoint of emptyPoints) {
+      const emptyCell = quiz[emptyPoint.y][emptyPoint.x];
+      const focusCellsList: SudokuCell[][] = getFocusCellsList(emptyPoint, quiz);
+      for (const cells of focusCellsList) {
+        const candidateGroup = cells.reduce((acc, cur) => {
           if (!emptyPoint.isEqual(cur.point)) {
             acc = acc.concat(cur.candidateValues);
           }
           return acc;
-        }, []));
-      }
-      const emptyCell = quiz[emptyPoint.y][emptyPoint.x];
-      const candidateValues = _.intersection(...candidateList);
-      if (candidateValues.length === 1) {
-        emptyCell.value = candidateValues[0];
-        emptyCell.candidateValues = [];
-        result = result && solve(quiz, emptyPoints.filter(x => !x.isEqual(emptyPoint)));
-      } else if (candidateValues.length > 1) {
-        emptyCell.candidateValues = candidateValues;
-        for (const candidateGroup of candidateGroupList) {
-          const tempCandidateValues = _.without(emptyCell.candidateValues, ...candidateGroup);
-          if (tempCandidateValues.length === 1) {
-            emptyCell.value = tempCandidateValues[0];
-            emptyCell.candidateValues = [];
-            break;
-          }
+        }, [])
+        const tempCandidateValues = _.without(emptyCell.candidateValues, ...candidateGroup);
+        if (tempCandidateValues.length === 1) {
+          setSudokuNumber(emptyCell.point, tempCandidateValues[0], quiz);
+          return diffCandinateValues(quiz, emptyPoints.filter(x => !x.isEqual(emptyPoint)));
+        } else {
+          result = false;
         }
       }
-      if (emptyCell.value && emptyCell.candidateValues.length === 0) {
-        result = true;
-      } else {
-        result = false;
-      }
+    }
+    return result;
+  }
+
+  function solve (quiz: SudokuCell[][], emptyPoints: Point[]): boolean {
+    let result = setCandinateValues(quiz, emptyPoints);
+    if (!result) {
+      result = diffCandinateValues(quiz, emptyPoints.reduce((acc, cur) => {
+        if (!quiz[cur.y][cur.x].value) {
+          acc.push(cur);
+        }
+        return acc;
+      }, []));
     }
     return result;
   }
@@ -300,11 +320,22 @@
 
   function getDifficultyName(str: string): string {
     if (str === 'EASY') {
-      return '쉬움'
+      return '쉬움';
     } else if (str === 'NORMAL') {
-      return '보통'
+      return '보통';
     } else if (str === 'HARD') {
-      return '어려움'
+      return '어려움';
+    } else {
+      return '';
+    }
+  }
+
+  function setSudokuNumber (point: Point, num: number, quiz: SudokuCell[][] = sudokuQuiz) {
+    const cell = quiz[point.y][point.x];
+    cell.setValue(num);
+    cell.setCandidateValues([]);
+    for (const focusCell of _.flatten(getFocusCellsList(point, quiz))) {
+      focusCell.removeCandidateValue(num);
     }
   }
 
@@ -325,17 +356,14 @@
       $mode = 'play';
       return;
     }
-    const num: number = detail.number;
     if (currentCell.freeze) {
       return
     }
+    const num: number = detail.number;
     if ($noteFlag) {
       currentCell.toggleCandidate(num);
     } else {
-      currentCell.setValue(num);
-      for (const cell of _.flatten(getFocusCellsList(currentCell.point))) {
-        cell.removeCandidateValue(num);
-      }
+      setSudokuNumber(currentCell.point, num);
     }
     sudokuQuiz = sudokuQuiz;
     history = [...history, _.cloneDeep(sudokuQuiz)];
@@ -385,7 +413,21 @@
       currentCell = sudokuQuiz[currentCell.point.y][currentCell.point.x];
     }
   }
+
+  function testSetCandinateValues () {
+    setCandinateValues(sudokuQuiz, _.flatten(sudokuQuiz).filter(x => !x.value).map(x => x.point));
+    sudokuQuiz = sudokuQuiz;
+  }
+  function testDiffCandinateValues () {
+    diffCandinateValues(sudokuQuiz, _.flatten(sudokuQuiz).filter(x => !x.value).map(x => x.point));
+    sudokuQuiz = sudokuQuiz;
+  }
 </script>
+
+{#if !isProd}
+  <button on:click={testSetCandinateValues}>setCandinateValues</button>
+  <button on:click={testDiffCandinateValues}>diffCandinateValues</button>
+{/if}
 
 <div class="game-info-wrapper">
   <div class="difficulty-wrapper">

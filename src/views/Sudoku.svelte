@@ -48,9 +48,9 @@
   let isComplate: boolean = false;
 
   $: viewSudoku = $mode == 'play' ? sudokuQuiz : blinkSudokuCell;
-  $: currentFocusPoints = currentCell ? _.flatten(getFocusPointsList(currentCell.point)) : [];
-  $: confictPoints = sudokuQuiz.reduce((acc, rows) => {
-    const conflicts = rows.reduce((acc, item) => {
+  $: currentFocusPoints = currentCell ? _.flatten(getFocusPointsList((currentCell as SudokuCell).point)) : [];
+  $: confictPoints = sudokuQuiz.reduce((acc: Point[], rows: SudokuCell[]) => {
+    const conflicts = rows.reduce((acc: Point[], item: SudokuCell) => {
       const focusCellsList: SudokuCell[][] = getFocusCellsList(item.point);
       for (const cells of focusCellsList) {
         const conficts: SudokuCell[] = cells.filter(x => x.value !== 0 && cells.filter(y => y.value === x.value).length > 1);
@@ -219,7 +219,7 @@
       const emptyCell = quiz[emptyPoint.y][emptyPoint.x];
       const focusCellsList: SudokuCell[][] = getFocusCellsList(emptyPoint, quiz);
       for (const cells of focusCellsList) {
-        const candidateGroup = cells.reduce((acc, cur) => {
+        const candidateGroup = cells.reduce((acc: number[], cur: SudokuCell) => {
           if (!emptyPoint.isEqual(cur.point)) {
             acc = acc.concat(cur.candidateValues);
           }
@@ -240,7 +240,7 @@
   function solve (quiz: SudokuCell[][], emptyPoints: Point[]): boolean {
     let result = setCandinateValues(quiz, emptyPoints);
     if (!result) {
-      result = diffCandinateValues(quiz, emptyPoints.reduce((acc, cur) => {
+      result = diffCandinateValues(quiz, emptyPoints.reduce((acc: Point[], cur: Point) => {
         if (!quiz[cur.y][cur.x].value) {
           acc.push(cur);
         }
@@ -356,7 +356,7 @@
       $mode = 'play';
       return;
     }
-    if (currentCell.freeze) {
+    if (!currentCell || currentCell.isFreeze()) {
       return
     }
     const num: number = detail.number;
@@ -374,6 +374,9 @@
       $mode = 'play';
       return;
     }
+    if (!currentCell) {
+      return;
+    }
     currentCell.setValue(0);
     currentCell.setCandidateValues([]);
     sudokuQuiz = sudokuQuiz;
@@ -385,9 +388,12 @@
       $mode = 'play';
       return;
     }
+    if (!currentCell) {
+      return;
+    }
     const point: Point = currentCell.point
     currentCell.setValue(sudokuSolution[point.y][point.x].value);
-    if (!currentCell.freeze) {
+    if (!currentCell.isFreeze()) {
       $remaindHintCount -= 1;
     }
     sudokuQuiz = sudokuQuiz;
@@ -410,7 +416,6 @@
       history = history;
       const quiz = _.cloneDeep(history[history.length - 1]);
       sudokuQuiz = quiz.map(x => x.map(y => SudokuCell.ToSudokuCell(y)));
-      currentCell = sudokuQuiz[currentCell.point.y][currentCell.point.x];
     }
   }
 

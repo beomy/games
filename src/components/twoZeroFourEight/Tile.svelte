@@ -1,15 +1,12 @@
 <script lang="ts">
-  import { Tile, Point } from '@/model';
+  import { Tile } from '@/model';
   import { appear } from '@/transition';
 
   export let tile: Tile;
-
-  let point: Point;
-  $: point = { x: tile.point.x, y: tile.point.y }
 </script>
 
 <div
-  class="tile tile-{tile.number} position-{point.x}-{point.y}"
+  class="tile tile-{tile.number} position-{tile.point.x}-{tile.point.y}"
   class:merged="{tile.isMerged}"
   class:delete="{tile.isDelete}"
 >

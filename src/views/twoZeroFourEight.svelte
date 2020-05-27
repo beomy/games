@@ -80,10 +80,7 @@
     if (historyMove.length > 0) {
       tiles = historyMove[historyMove.length - 1];
     } else {
-      for (const prefix of ['A', 'B']) {
-        const newTile = getTile(prefix, 2);
-        tiles = [...tiles, newTile];
-      }
+      tiles = [ getTile('A', 2) as Tile, getTile('B', 2) as Tile ];
     }
 
     if (historyScore.length > 0) {
@@ -93,7 +90,7 @@
 
   function getCoreTileValue (target: Tile[]) {
     if (target) {
-      return target.reduce((acc, cur) => {
+      return target.reduce((acc: any, cur: Tile) => {
         if (!cur.isDelete) {
           acc.push({
             id: cur.id,
@@ -108,7 +105,7 @@
     }
   }
 
-  function popRemainPoint (point: string|null = null): Point {
+  function popRemainPoint (point: string|null = null): Point|null {
     let index = point && remainPoint.indexOf(point) >= 0
       ? remainPoint.indexOf(point)
       : _.random(0, remainPoint.length - 1);
@@ -124,8 +121,8 @@
     prefix: string|null = null,
     fixNumber: number|null = null,
     point: string|null = null
-  ): Tile {
-    const remainPoint: Point = popRemainPoint(point);
+  ): Tile|null {
+    const remainPoint: Point|null = popRemainPoint(point);
     if (remainPoint) {
       const number: number = fixNumber
         ? fixNumber
@@ -169,8 +166,9 @@
       moveTileRow(tileRow, direction);
     }
 
-    if (!_.isEqual(cloneTiles, tiles)) {
-      pushTile(getTile());
+    const newTile = getTile()
+    if (!_.isEqual(cloneTiles, tiles) && newTile) {
+      pushTile(newTile);
     }
   }
 
@@ -183,8 +181,8 @@
   function calcTileNumber (tileRow: Tile[]): void {
     for (let index = 1; index < tileRow.length; index++) {
       const cur: Tile = tileRow[index];
-      const pre: Tile = getPrevTile(tileRow, index);
-      if (!pre.isMerged && cur.number === pre.number) {
+      const pre: Tile|null = getPrevTile(tileRow, index);
+      if (pre && !pre.isMerged && cur.number === pre.number) {
         pre.number += cur.number;
         cur.isDelete = true;
         pre.isMerged = true;
@@ -203,19 +201,22 @@
       if (index === 0) {
         cur.point[pointField] = startPoint;
       } else {
-        const pre: Tile = getPrevTile(tileRow, index);
-        cur.point[pointField] = cur.isDelete
-          ? pre.point[pointField]
-          : pre.point[pointField] + moveDirection;
+        const pre: Tile|null = getPrevTile(tileRow, index);
+        if (pre) {
+          cur.point[pointField] = cur.isDelete
+            ? pre.point[pointField]
+            : pre.point[pointField] + moveDirection;
+        }
       }
     }
   }
 
-  function getPrevTile(tileRow: Tile[], index: number): Tile {
-    return tileRow.filter((x, i) => i < index && !x.isDelete).pop();
+  function getPrevTile(tileRow: Tile[], index: number): Tile|null {
+    const tile = tileRow.filter((x, i) => i < index && !x.isDelete).pop();
+    return tile ? tile : null;
   }
 
-  function possibleMove (tileRow: Tile, direction: Direction): boolean {
+  function possibleMove (tileRow: Tile[], direction: Direction): boolean {
     const isAsc: boolean = [Direction.TOP, Direction.LEFT].includes(direction);
     const pointField: string = [Direction.TOP, Direction.BOTTOM].includes(direction) ? 'y' : 'x';
     const startPoint: number = isAsc ? 1 : rowCount;
@@ -224,7 +225,7 @@
     let result = false;
     for (const cur of tileRow.filter(x => !x.isDelete)) {
       const index: number = tileRow.indexOf(cur);
-      const pre: Tile = getPrevTile(tileRow, index);
+      const pre: Tile|null = getPrevTile(tileRow, index);
 
       if (index === 0 || !pre) {
         if (cur.point[pointField] !== startPoint) {
@@ -290,7 +291,7 @@
     remainPoint = _.cloneDeep(refPoint)
     historyMove = [];
     historyScore = [];
-    tiles = [ getTile('A', 2), getTile('B', 2) ];
+    tiles = [ getTile('A', 2) as Tile, getTile('B', 2) as Tile ];
     score = 0;
     calcRemainPoint();
   }

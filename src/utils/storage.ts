@@ -1,5 +1,5 @@
 export default class LocalStorageUtil {
-  public static GetStorage (field: string): IStorage {
+  public static GetStorage (field: string): any {
     const rawStorage: string|null = localStorage.getItem(field);
     return rawStorage
       ? JSON.parse(rawStorage)

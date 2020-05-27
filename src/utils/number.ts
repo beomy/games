@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import Point from '../model/Point';
 
 export default class NumberUtil {
   public static UniqueRandom (min: number, max: number, refs: number[] = []): number|null {

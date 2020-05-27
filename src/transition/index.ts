@@ -1,4 +1,4 @@
-import appear from './appear';
+import appear from '@/transition/appear';
 
 export {
   appear,

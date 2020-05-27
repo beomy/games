@@ -1,4 +1,4 @@
-import Point from './Point';
+import Point from '@/model/Point';
 
 export default class Tile {
   id: string;

@@ -47,13 +47,11 @@
     isGameOver = !isPossibleMove && remainPoint.length === 0;
   }
 
-  $: {
-    LocalStorageUtil.setStorage('2048Game', {
-      results: historyMove,
-      score: historyScore,
-      best: bestScore
-    });
-  }
+  $: LocalStorageUtil.SetStorage('2048Game', {
+    results: historyMove,
+    score: historyScore,
+    best: bestScore
+  });
 
   $: {
     const historyTiles = getCoreTileValue(historyMove[historyMove.length - 1]);
@@ -74,7 +72,7 @@
     }
     remainPoint = _.cloneDeep(refPoint);
 
-    const storage = LocalStorageUtil.getStorage('2048Game');
+    const storage = LocalStorageUtil.GetStorage('2048Game');
     historyMove = storage && storage.results ? storage.results : [];
     historyScore = storage && storage.score ? storage.score : [];
     bestScore = storage && storage.best ? storage.best : 0;
@@ -131,7 +129,7 @@
     if (remainPoint) {
       const number: number = fixNumber
         ? fixNumber
-        : NumberUtil.ratioRandom([2, 4], [8, 2]);
+        : NumberUtil.RatioRandom([2, 4], [8, 2]);
       return new Tile(prefix, number, remainPoint);
     } else {
       return null;

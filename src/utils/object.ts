@@ -1,15 +1,15 @@
 export default class ObjectUtil {
-  static IsEmpty (obj: any) {
+  public static IsEmpty (obj: any): boolean {
     return this.IsUndef(obj)
       ? true
       : Object.keys(obj).length === 0;
   }
 
-  static IsUndef (obj: any) {
+  public static IsUndef (obj: any): boolean {
     return obj === undefined || obj === null;
   }
 
-  static EnumToArray<E> (Enum: any): any[] {
+  public static EnumToArray<E> (Enum: any): any[] {
     const values = Object.values(Enum);
     const ids = values.splice(values.length / 2);
     return ids.map((x, i) => ({

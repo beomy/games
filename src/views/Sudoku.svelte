@@ -36,7 +36,7 @@
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
   ]);
-  let selectedDifficulty: Difficulty = LocalStorageUtil.getStorage('sudoku.difficulty') || Difficulty.EASY;
+  let selectedDifficulty: Difficulty = LocalStorageUtil.GetStorage('sudoku.difficulty') || Difficulty.EASY;
   let sudokuSolution: SudokuCell[][] = blinkSudokuCell;
   let sudokuQuiz: SudokuCell[][] = blinkSudokuCell;
   let viewSudoku: SudokuCell[][] = blinkSudokuCell;
@@ -60,32 +60,32 @@
     }, [])
     return acc.concat(conflicts);
   }, []);
-  $: LocalStorageUtil.setStorage('sudoku.results', history);
-  $: LocalStorageUtil.setStorage('sudoku.remaindHintCount', $remaindHintCount);
-  $: LocalStorageUtil.setStorage('sudoku.solution', sudokuSolution);
-  $: LocalStorageUtil.setStorage('sudoku.timer', $spandTime);
+  $: LocalStorageUtil.SetStorage('sudoku.results', history);
+  $: LocalStorageUtil.SetStorage('sudoku.remaindHintCount', $remaindHintCount);
+  $: LocalStorageUtil.SetStorage('sudoku.solution', sudokuSolution);
+  $: LocalStorageUtil.SetStorage('sudoku.timer', $spandTime);
   $: isComplate = _.isEqual(cellToSudoku(sudokuSolution), cellToSudoku(sudokuQuiz));
   $: if (isComplate) {
     $mode = 'pause';
   }
-  $: if (selectedDifficulty !== LocalStorageUtil.getStorage('sudoku.difficulty')) {
-    LocalStorageUtil.setStorage('sudoku.difficulty', selectedDifficulty);
+  $: if (selectedDifficulty !== LocalStorageUtil.GetStorage('sudoku.difficulty')) {
+    LocalStorageUtil.SetStorage('sudoku.difficulty', selectedDifficulty);
     onNewGame();
   }
 
   (function () {
-    history = LocalStorageUtil.getStorage('sudoku.results');
+    history = LocalStorageUtil.GetStorage('sudoku.results');
     if (ObjectUtil.IsEmpty(history)) {
       isMaking = true;
       $mode = 'pause';
       setTimeout(() => init());
     } else {
-      const solution = LocalStorageUtil.getStorage('sudoku.solution');
+      const solution = LocalStorageUtil.GetStorage('sudoku.solution');
       const quize = _.cloneDeep(history[history.length - 1]);
       sudokuSolution = solution.map(x => x.map(y => SudokuCell.ToSudokuCell(y)));
       sudokuQuiz = quize.map(x => x.map(y => SudokuCell.ToSudokuCell(y)));
-      $remaindHintCount = LocalStorageUtil.getStorage('sudoku.remaindHintCount');
-      $spandTime = LocalStorageUtil.getStorage('sudoku.timer');
+      $remaindHintCount = LocalStorageUtil.GetStorage('sudoku.remaindHintCount');
+      $spandTime = LocalStorageUtil.GetStorage('sudoku.timer');
       $mode = 'play';
     }
   })();
@@ -110,15 +110,15 @@
   function makeSudoku (): number[][] {
     const x1: number[][] = [ [0, 0, 1], [1, 0, 0], [0, 1, 0] ];
     const x2: number[][] = [ [0, 1, 0], [0, 0, 1], [1, 0, 0] ];
-    const s: number[][] = ArrayUtil.toMatrix(ArrayUtil.mix([1, 2, 3, 4, 5, 6, 7, 8, 9]), 3);
-    const x1s: number[][] = MatrixUtil.multiply(x1, s);
-    const x2s: number[][] = MatrixUtil.multiply(x2, s);
-    const sx1: number[][] = MatrixUtil.multiply(s, x1);
-    const x2sx1: number[][] = MatrixUtil.multiply(x2s, x1);
-    const x1sx1: number[][] = MatrixUtil.multiply(x1s, x1);
-    const sx2: number[][] = MatrixUtil.multiply(s, x2);
-    const x1sx2: number[][] = MatrixUtil.multiply(x1s, x2);
-    const x2sx2: number[][] = MatrixUtil.multiply(x2s, x2);
+    const s: number[][] = ArrayUtil.ToMatrix(ArrayUtil.Mix([1, 2, 3, 4, 5, 6, 7, 8, 9]), 3);
+    const x1s: number[][] = MatrixUtil.Multiply(x1, s);
+    const x2s: number[][] = MatrixUtil.Multiply(x2, s);
+    const sx1: number[][] = MatrixUtil.Multiply(s, x1);
+    const x2sx1: number[][] = MatrixUtil.Multiply(x2s, x1);
+    const x1sx1: number[][] = MatrixUtil.Multiply(x1s, x1);
+    const sx2: number[][] = MatrixUtil.Multiply(s, x2);
+    const x1sx2: number[][] = MatrixUtil.Multiply(x1s, x2);
+    const x2sx2: number[][] = MatrixUtil.Multiply(x2s, x2);
 
     return [
       s[0].concat(x1s[0]).concat(x2s[0]),
@@ -167,7 +167,7 @@
     while(!isVaildDifficulty(emptyPoints)) {
       const emptyNumbers = emptyPoints.map(x => x.toNumber(9));
       const invalidNumbers = invalidPoints.map(x => x.toNumber(9));
-      const rand = NumberUtil.uniqueRandom(0, 80, [...emptyNumbers, ...invalidNumbers]);
+      const rand: number|null = NumberUtil.UniqueRandom(0, 80, [...emptyNumbers, ...invalidNumbers]);
       if (rand === null) {
         break;
       }

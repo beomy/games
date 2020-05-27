@@ -1,11 +1,11 @@
 export default class LocalStorageUtil {
-  static getStorage (field: string): IStorage {
+  public static GetStorage (field: string): IStorage {
     const rawStorage: string|null = localStorage.getItem(field);
     return rawStorage
       ? JSON.parse(rawStorage)
       : null;
   }
-  static setStorage (field: string, data: any) {
+  public static SetStorage (field: string, data: any): void {
     localStorage.setItem(field, JSON.stringify(data));
   }
 };

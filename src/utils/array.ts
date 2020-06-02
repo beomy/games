@@ -1,7 +1,7 @@
 import _ from 'lodash'
 
 export default class ArrayUtil {
-  public static Mix (array: any[]): any[] {
+  public static mix (array: any[]): any[] {
     const newArray: any[] = [];
     const copyArray: any[] = _.cloneDeep(array);
     const rand: number = _.random(0, copyArray.length - 1);
@@ -14,7 +14,7 @@ export default class ArrayUtil {
     return newArray;
   }
 
-  public static ToMatrix (array: any[], width: number): any[][] {
+  public static toMatrix (array: any[], width: number): any[][] {
     const newArray: any[][] = [];
     const copyArray: any[] = _.cloneDeep(array);
     let item: any[] = copyArray.splice(0, width);

@@ -1,33 +1,33 @@
 import ObjectUtil from '@/utils/object';
 
-describe('IsEmpty', () => {
+describe('isEmpty', () => {
   test('null', () => {
-    expect(ObjectUtil.IsEmpty(null)).toEqual(true);
+    expect(ObjectUtil.isEmpty(null)).toEqual(true);
   });
   test('undefined', () => {
-    expect(ObjectUtil.IsEmpty(undefined)).toEqual(true);
+    expect(ObjectUtil.isEmpty(undefined)).toEqual(true);
   });
   test('empty object', () => {
-    expect(ObjectUtil.IsEmpty({})).toEqual(true);
+    expect(ObjectUtil.isEmpty({})).toEqual(true);
   });
   test('not empty object', () => {
-    expect(ObjectUtil.IsEmpty({t: 1})).toEqual(false);
+    expect(ObjectUtil.isEmpty({t: 1})).toEqual(false);
   });
 });
 
-describe('IsUndef', () => {
+describe('isUndef', () => {
   test('null', () => {
-    expect(ObjectUtil.IsUndef(null)).toEqual(true);
+    expect(ObjectUtil.isUndef(null)).toEqual(true);
   });
   test('undefined', () => {
-    expect(ObjectUtil.IsUndef(undefined)).toEqual(true);
+    expect(ObjectUtil.isUndef(undefined)).toEqual(true);
   });
   test('object', () => {
-    expect(ObjectUtil.IsUndef({})).toEqual(false);
+    expect(ObjectUtil.isUndef({})).toEqual(false);
   });
 });
 
-describe('EnumToArray', () => {
+describe('enumToArray', () => {
   enum Difficulty {
     EASY = 43,
     NORMAL = 50,
@@ -35,7 +35,7 @@ describe('EnumToArray', () => {
   };
 
   test('null', () => {
-    expect(ObjectUtil.EnumToArray(Difficulty)).toEqual([
+    expect(ObjectUtil.enumToArray(Difficulty)).toEqual([
       { id: 43, value: 'EASY' },
       { id: 50, value: 'NORMAL' },
       { id: 55, value: 'HARD' },

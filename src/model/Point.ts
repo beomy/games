@@ -15,7 +15,7 @@ export default class Point {
     return this.y * width + this.x;
   }
 
-  static ToPoint (num: number, width: number): Point {
+  static toPoint (num: number, width: number): Point {
     const x = num % width;
     const y = Math.floor(num / width);
     return new Point(x, y);

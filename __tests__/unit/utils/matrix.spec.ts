@@ -1,6 +1,6 @@
 import MatrixUtil from '@/utils/matrix';
 
-describe('Multiply', () => {
+describe('multiply', () => {
   test('simple', () => {
     const a = [
       [1, 2, 3],
@@ -12,7 +12,7 @@ describe('Multiply', () => {
       [66, 81, 96],
       [102, 126, 150],
     ]
-    expect(MatrixUtil.Multiply(a, a)).toEqual(result);
+    expect(MatrixUtil.multiply(a, a)).toEqual(result);
   });
   test('identity matrix', () => {
     const a = [
@@ -25,6 +25,6 @@ describe('Multiply', () => {
       [0, 1, 0],
       [0, 0, 1],
     ]
-    expect(MatrixUtil.Multiply(a, b)).toEqual(a);
+    expect(MatrixUtil.multiply(a, b)).toEqual(a);
   });
 });

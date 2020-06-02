@@ -8,6 +8,6 @@ describe('toMatrix', () => {
       [4, 5, 6],
       [7, 8, 9],
     ];
-    expect(ArrayUtil.ToMatrix(src, 3)).toEqual(result);
+    expect(ArrayUtil.toMatrix(src, 3)).toEqual(result);
   });
 });

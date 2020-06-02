@@ -47,7 +47,7 @@
     isGameOver = !isPossibleMove && remainPoint.length === 0;
   }
 
-  $: LocalStorageUtil.SetStorage('2048Game', {
+  $: LocalStorageUtil.setStorage('2048Game', {
     results: historyMove,
     score: historyScore,
     best: bestScore
@@ -72,7 +72,7 @@
     }
     remainPoint = _.cloneDeep(refPoint);
 
-    const storage = LocalStorageUtil.GetStorage('2048Game');
+    const storage = LocalStorageUtil.getStorage('2048Game');
     historyMove = storage && storage.results ? storage.results : [];
     historyScore = storage && storage.score ? storage.score : [];
     bestScore = storage && storage.best ? storage.best : 0;
@@ -126,7 +126,7 @@
     if (remainPoint) {
       const number: number = fixNumber
         ? fixNumber
-        : NumberUtil.RatioRandom([2, 4], [8, 2]);
+        : NumberUtil.ratioRandom([2, 4], [8, 2]);
       return new Tile(prefix, number, remainPoint);
     } else {
       return null;

@@ -53,7 +53,7 @@ export default class SudokuCell {
     return this.freeze
   }
 
-  static ToSudokuCell (obj: any): SudokuCell {
+  static toSudokuCell (obj: any): SudokuCell {
     const cell = new SudokuCell(obj.value, new Point(obj.point.x, obj.point.y));
     cell.setFreeze(obj.freeze);
     cell.setCandidateValues(obj.candidateValues);

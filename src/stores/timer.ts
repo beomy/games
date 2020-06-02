@@ -1,8 +1,8 @@
 import { writable, derived } from 'svelte/store';
-import { DateUtil } from '../utils';
+import { DateUtil } from '@/utils';
 
 export const spandTime = writable(0);
 export const mode = writable('pause');
 export const timeString = derived(spandTime, ($spandTime) => {
-  return DateUtil.MsToStr($spandTime * 1000);
+  return DateUtil.msToStr($spandTime * 1000);
 })

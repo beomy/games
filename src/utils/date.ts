@@ -1,5 +1,5 @@
 export default class DateUtil {
-  static MsToStr (ms): string {
+  public static msToStr (ms: number): string {
     const sec = 1000
     const min = sec * 60
     const hour = min * 60

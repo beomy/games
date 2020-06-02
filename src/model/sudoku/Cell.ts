@@ -1,4 +1,4 @@
-import Point from '../Point';
+import Point from '@/model/Point';
 
 export default class SudokuCell {
   value: number;
@@ -49,7 +49,11 @@ export default class SudokuCell {
     this.value = value;
   }
 
-  static ToSudokuCell (obj: any): SudokuCell {
+  isFreeze (): boolean {
+    return this.freeze
+  }
+
+  static toSudokuCell (obj: any): SudokuCell {
     const cell = new SudokuCell(obj.value, new Point(obj.point.x, obj.point.y));
     cell.setFreeze(obj.freeze);
     cell.setCandidateValues(obj.candidateValues);

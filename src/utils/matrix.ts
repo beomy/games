@@ -1,5 +1,5 @@
 export default class MatrixUtil {
-  static multiply (a: number[][], b: number[][]) {
+  public static multiply (a: number[][], b: number[][]): number[][] {
     return a.map((row) => {
       return row.map((_, i) => {
         return row.reduce((sum, cell, j) => {

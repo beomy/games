@@ -1,5 +1,10 @@
+interface IAppearTrasnsitionOption {
+  delay?: number;
+  duration?: number;
+}
+
 export default function appear (node: Element,
-  { delay = 0, duration = 400 }: AppearTrasnsitionOption)
+  { delay = 0, duration = 400 }: IAppearTrasnsitionOption)
 {
   return {
     delay,

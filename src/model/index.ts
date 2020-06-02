@@ -1,5 +1,5 @@
-import Point from './Point';
-import Tile from './Tile';
+import Point from '@/model/Point';
+import Tile from '@/model/twoZeroFourEight/Tile';
 
 export {
   Point,

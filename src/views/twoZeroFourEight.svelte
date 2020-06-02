@@ -137,7 +137,7 @@
     const compactTiles = tiles.filter(x => !x.isDelete);
     tiles = compactTiles.map(x => ({
       ...x,
-      isMerged: false
+      isMerged: false,
     }));
   }
 
@@ -160,7 +160,7 @@
   function moveTile (direction: Direction): void {
     refactoryTile();
 
-    const cloneTiles = _.cloneDeep(tiles)
+    const cloneTiles = _.cloneDeep(tiles);
     const tileGroup = directionTileGroup(direction);
     for (const [key, tileRow] of Object.entries(tileGroup)) {
       moveTileRow(tileRow, direction);
@@ -288,7 +288,7 @@
   }
 
   function newGame (): void {
-    remainPoint = _.cloneDeep(refPoint)
+    remainPoint = _.cloneDeep(refPoint);
     historyMove = [];
     historyScore = [];
     tiles = [ getTile('A', 2) as Tile, getTile('B', 2) as Tile ];

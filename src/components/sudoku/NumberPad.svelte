@@ -1,10 +1,10 @@
 <script lang="ts">
-  import Number from '@/components/global/Number'
+  import Number from '@/components/global/Number.svelte';
   import { createEventDispatcher } from 'svelte';
 
   const dispatch = createEventDispatcher();
 
-  function onClickPad (number) {
+  function onClickPad (number: number) {
     dispatch('click', {
       number,
     });

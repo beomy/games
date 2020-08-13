@@ -76,7 +76,6 @@
     top: 23px;
   }
   .game-title {
-    display: inline-block;
     height: 55px;
     line-height: 55px;
     float: left;

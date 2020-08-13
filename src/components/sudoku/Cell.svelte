@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import SudokuCell from '@/model/sudoku/Cell';
+  import type SudokuCell from '@/model/sudoku/Cell';
   import Number from '@/components/global/Number.svelte';
 
   export let cell: SudokuCell;
@@ -16,7 +16,7 @@
   {#if cell.value}
     <div
       class="value"
-      class:mutable={!cell.freeze}
+      class:mutable={!cell.isFreeze()}
     >
       <Number value={cell.value} />
     </div>

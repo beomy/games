@@ -1,6 +1,5 @@
 <script lang="ts">
   import _ from 'lodash';
-  import { onMount } from 'svelte';
   import { fade } from 'svelte/transition';
   import { Hammer, swipe } from 'svelte-hammer';
   import { Tile, Point } from '@/model';
@@ -37,11 +36,11 @@
   $: {
     let isPossibleMove: boolean = false;
     const groupRight = directionTileGroup(Direction.RIGHT);
-    for (const [key, tiles] of Object.entries(groupRight)) {
+    for (const [, tiles] of Object.entries(groupRight)) {
       isPossibleMove = isPossibleMove || possibleMove(tiles, Direction.RIGHT);
     }
     const groupBottom = directionTileGroup(Direction.BOTTOM);
-    for (const [key, tiles] of Object.entries(groupBottom)) {
+    for (const [, tiles] of Object.entries(groupBottom)) {
       isPossibleMove = isPossibleMove || possibleMove(tiles, Direction.BOTTOM);
     }
     isGameOver = !isPossibleMove && remainPoint.length === 0;
@@ -162,7 +161,7 @@
 
     const cloneTiles = _.cloneDeep(tiles);
     const tileGroup = directionTileGroup(direction);
-    for (const [key, tileRow] of Object.entries(tileGroup)) {
+    for (const [, tileRow] of Object.entries(tileGroup)) {
       moveTileRow(tileRow, direction);
     }
 
@@ -260,7 +259,7 @@
       ? _.groupBy(tiles, 'point.x')
       : _.groupBy(tiles, 'point.y');
 
-    for (const [key, tileRow] of Object.entries(tileGroup)) {
+    for (const [, tileRow] of Object.entries(tileGroup)) {
       tileRow.sort((a: Tile, b: Tile) => {
         if (direction === Direction.BOTTOM) {
           return b.point.y - a.point.y;
@@ -310,10 +309,10 @@
 <div
   class="game-container"
   use:swipe={{ direction: Hammer.DIRECTION_ALL }}
-  on:swipeleft={() => moveTile('left')}
-  on:swiperight={() => moveTile('right')}
-  on:swipeup={() => moveTile('top')}
-  on:swipedown={() => moveTile('bottom')}
+  on:swipeleft={() => moveTile(Direction.LEFT)}
+  on:swiperight={() => moveTile(Direction.RIGHT)}
+  on:swipeup={() => moveTile(Direction.TOP)}
+  on:swipedown={() => moveTile(Direction.BOTTOM)}
 >
   {#if isGameOver}
     <div
@@ -324,9 +323,9 @@
     </div>
   {/if}
   <div class="grid-container">
-    {#each gridCount as row}
+    {#each gridCount as {}}
       <div class="grid-row">
-        {#each gridCount as cell}
+        {#each gridCount as {}}
           <div class="grid-cell"></div>
         {/each}
       </div>

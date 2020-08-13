@@ -4,7 +4,7 @@
   import SudokuCell from '@/model/sudoku/Cell';
   import { ArrayUtil, MatrixUtil, NumberUtil, LocalStorageUtil, ObjectUtil } from '@/utils';
   import Cell from '@/components/sudoku/Cell.svelte';
-  import NumberPad from '@/components/sudoku/Numberpad.svelte';
+  import NumberPad from '@/components/sudoku/NumberPad.svelte';
   import GameNavigation from '@/components/GameNavigation.svelte';
   import Timer from '@/components/global/Timer.svelte';
   import { remaindHintCount } from '@/stores/navHint';
@@ -24,7 +24,7 @@
   };
 
   const isProd = process.env.NODE_ENV === 'production';
-  const difficultyList = ObjectUtil.enumToArray(Difficulty);
+  const difficultyList: { id: number, value: string }[] = ObjectUtil.enumToArray(Difficulty);
   const blinkSudokuCell = sudokuToCell([
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -80,8 +80,8 @@
       $mode = 'pause';
       setTimeout(() => init());
     } else {
-      const solution = LocalStorageUtil.getStorage('sudoku.solution');
-      const quize = _.cloneDeep(history[history.length - 1]);
+      const solution: SudokuCell[][] = LocalStorageUtil.getStorage('sudoku.solution');
+      const quize: SudokuCell[][] = _.cloneDeep(history[history.length - 1]);
       sudokuSolution = solution.map(x => x.map(y => SudokuCell.toSudokuCell(y)));
       sudokuQuiz = quize.map(x => x.map(y => SudokuCell.toSudokuCell(y)));
       $remaindHintCount = LocalStorageUtil.getStorage('sudoku.remaindHintCount');
@@ -92,7 +92,7 @@
 
   function init (): void {
     const sudokuRef = makeSudoku();
-    const { quiz, emptyPoints, invalidPoints }: IQuzyDetail = makeSudokuQuiz(sudokuRef);
+    const { quiz, emptyPoints }: IQuzyDetail = makeSudokuQuiz(sudokuRef);
     if (!isVaildDifficulty(emptyPoints)) {
       setTimeout(() => init());
     } else {
@@ -256,18 +256,6 @@
     return _.difference(ref, values)
   }
 
-  function pointtoSudokuCell (points: Point[], sudoku: SudokuCell[][]) {
-    const sudokuCells: SudokuCell[] = [];
-    for (const rows of sudoku) {
-      for (const item of rows) {
-        if (points.find(x => x.isEqual(item.point))) {
-          sudokuCells.push(item);
-        }
-      }
-    }
-    return sudokuCells;
-  }
-
   function getFocusPointsList (point: Point): Point[][] {
     const startX = Math.floor(point.x / 3) * 3;
     const endX = (Math.floor(point.x / 3) + 1) * 3 - 1;
@@ -339,7 +327,7 @@
     }
   }
 
-  function onClickCell (event) {
+  function onClickCell (event: CustomEvent) {
     currentCell = event.detail.cell;
   }
 
@@ -414,7 +402,7 @@
     if (history.length > 1) {
       history.pop();
       history = history;
-      const quiz = _.cloneDeep(history[history.length - 1]);
+      const quiz: SudokuCell[][] = _.cloneDeep(history[history.length - 1]);
       sudokuQuiz = quiz.map(x => x.map(y => SudokuCell.toSudokuCell(y)));
     }
   }
@@ -549,7 +537,6 @@
       }
     }
     .timer-wrapper {
-      display: inline-block;
       float: right;
     }
   }

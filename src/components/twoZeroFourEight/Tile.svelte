@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Tile } from '@/model';
+  import type { Tile } from '@/model';
   import { appear } from '@/transition';
 
   export let tile: Tile;
@@ -102,7 +102,7 @@
     }
     .tile-128 .tile-inner,
     .tile-256 .tile-inner,
-    .tile-512 .tile-inner, {
+    .tile-512 .tile-inner {
       font-size: $smFont;
     }
     .tile-1024 .tile-inner,

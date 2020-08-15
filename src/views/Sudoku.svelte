@@ -531,7 +531,6 @@
         appearance:none;
         padding: 3px 10px;
         border-radius: 5px;
-        background: url(./images/arrow.svg) no-repeat;
         background-position-x: calc(100% - 10px);
         background-position-y: 10px;
       }

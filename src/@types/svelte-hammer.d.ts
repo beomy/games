@@ -1,5 +1,5 @@
 namespace svelte.JSX {
-  interface HTMLAttributes {
+  interface DOMAttributes {
     [event: string]: any;
   }
 }

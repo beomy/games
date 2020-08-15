@@ -1,1 +1,5 @@
-declare module 'svelte-hammer';
+namespace svelte.JSX {
+  interface DOMAttributes {
+    [event: string]: any;
+  }
+}

@@ -39,12 +39,12 @@
   },
   "dependencies": {
     "lodash": "^4.17.15",
-    "svelte-hammer": "^0.1.5",
+    "svelte-hammer": "^0.1.6",
     "svelte-spa-router": "^2.0.0"
   },
   "husky": {
     "hooks": {
-      "pre-push": "npm run validate && npm run test:unit"
+      "pre-commit": "npm run validate && npm run test:unit"
     }
   }
 }

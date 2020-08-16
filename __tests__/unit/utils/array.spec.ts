@@ -1,4 +1,4 @@
-import ArrayUtil from '@/utils/array';
+import ArrayUtil from '../../../src/utils/array';
 
 describe('toMatrix', () => {
   test('simple', () => {

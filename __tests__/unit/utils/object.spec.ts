@@ -1,4 +1,4 @@
-import ObjectUtil from '@/utils/object';
+import ObjectUtil from '../../../src/utils/object';
 
 describe('isEmpty', () => {
   test('null', () => {

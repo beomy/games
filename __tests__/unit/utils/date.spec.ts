@@ -1,4 +1,4 @@
-import DateUtil from '@/utils/date';
+import DateUtil from '../../../src/utils/date';
 
 describe('msToStr', () => {
   const sec = 1000

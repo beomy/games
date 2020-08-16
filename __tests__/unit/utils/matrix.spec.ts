@@ -1,4 +1,4 @@
-import MatrixUtil from '@/utils/matrix';
+import MatrixUtil from '../../../src/utils/matrix';
 
 describe('multiply', () => {
   test('simple', () => {

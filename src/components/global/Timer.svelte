@@ -5,12 +5,10 @@
   const dispatch = createEventDispatcher();
   let timerId: any;
 
-  $: {
-    if ($mode === 'play') {
-      play();
-    } else {
-      pause();
-    }
+  $: if ($mode === 'play') {
+    play();
+  } else {
+    pause();
   }
   
   onDestroy(() => {
